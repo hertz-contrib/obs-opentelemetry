@@ -1,6 +1,6 @@
 # opentelemetry (This is a community driven project)
 
-[Opentelemetry](https://opentelemetry.io/) for [Kitex](https://github.com/cloudwego/hertz)
+[Opentelemetry](https://opentelemetry.io/) for [Hertz](https://github.com/cloudwego/hertz)
 
 ## Feature
 #### Provider
