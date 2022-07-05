@@ -21,8 +21,7 @@ import (
 	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
-// Server HTTP metrics.
-// Ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md#http-server
+// Server HTTP metrics. ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md#http-server
 const (
 	RequestCount          = "http.server.request_count"           // Incoming request count total
 	RequestContentLength  = "http.server.request_content_length"  // Incoming request bytes total
@@ -30,8 +29,7 @@ const (
 	ServerLatency         = "http.server.duration"                // Incoming end to end duration, microseconds
 )
 
-// Client HTTP metrics.
-// Ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md#http-client
+// Client HTTP metrics. ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md#http-client
 // http.client.duration	Histogram	milliseconds	ms	measures the duration outbound HTTP requests
 // http.client.request.size	Histogram	bytes	By	measures the size of HTTP request messages (compressed)
 // http.client.response.size	Histogram	bytes	By	measures the size of HTTP response messages (compressed)
@@ -82,7 +80,6 @@ func extractMetricsAttributesFromSpan(span oteltrace.Span) []attribute.KeyValue 
 		if matchAttributeKey(attr.Key, HTTPMetricsAttributes) {
 			attrs = append(attrs, attr)
 		}
-
 		if matchAttributeKey(attr.Key, PeerMetricsAttributes) {
 			attrs = append(attrs, attr)
 		}
@@ -93,7 +90,6 @@ func extractMetricsAttributesFromSpan(span oteltrace.Span) []attribute.KeyValue 
 		if matchAttributeKey(attr.Key, MetricResourceAttributes) {
 			attrs = append(attrs, attr)
 		}
-
 	}
 
 	// status code

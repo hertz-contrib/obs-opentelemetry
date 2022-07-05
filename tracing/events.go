@@ -34,7 +34,6 @@ var commonEvents = map[string]stats.Event{
 	"write_finish":         stats.WriteFinish,
 }
 
-
 func injectStatsEventsToSpan(span trace.Span, st traceinfo.HTTPStats) {
 	for name, event := range commonEvents {
 		if gotEvent := st.GetEvent(event); gotEvent != nil {
