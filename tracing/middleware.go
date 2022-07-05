@@ -123,6 +123,10 @@ func ServerMiddleware(cfg *Config) app.HandlerFunc {
 		}
 
 		md := metainfo.GetAllValues(ctx)
+
+		// [Notice] cgi variable to http header
+		md = CGIVariableToHTTPHeaderMetadata(md)
+
 		peerServiceAttributes := extractPeerServiceAttributesFromMetaInfo(md)
 
 		bags, spanCtx := Extract(ctx, cfg, md)

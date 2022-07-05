@@ -58,7 +58,7 @@ func Inject(ctx context.Context, c *Config, metadata map[string]string) {
 
 // Extract returns the baggage and span context
 func Extract(ctx context.Context, c *Config, metadata map[string]string) (baggage.Baggage, trace.SpanContext) {
-	ctx = c.textMapPropagator.Extract(ctx, &metadataProvider{metadata: CGIVariableToHTTPHeaderMetadata(metadata)})
+	ctx = c.textMapPropagator.Extract(ctx, &metadataProvider{metadata: metadata})
 	return baggage.FromContext(ctx), trace.SpanContextFromContext(ctx)
 }
 
