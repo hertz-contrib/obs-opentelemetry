@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package hertz
+package opentelemetry
 
-// Name and Version info of this framework, used for statistics and debug
+// Name and Version info of this sdk, used for statistics and debug
 const (
-	Name    = "Hertz"
+	Name    = "obs-opentelemetry"
 	Version = "v0.1.0"
 )
