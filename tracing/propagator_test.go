@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/bytedance/gopkg/cloud/metainfo"
+	"github.com/cloudwego/hertz/pkg/protocol"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/contrib/propagators/jaeger"
@@ -36,10 +37,13 @@ func TestExtract(t *testing.T) {
 	ctx = baggage.ContextWithBaggage(ctx, bags)
 	ctx = metainfo.WithValue(ctx, "foo", "bar")
 
+	headers := &protocol.RequestHeader{}
+	headers.Set("foo", "bar")
+
 	type args struct {
 		ctx      context.Context
 		c        *Config
-		metadata map[string]string
+		metadata *protocol.RequestHeader
 	}
 	tests := []struct {
 		name  string
@@ -50,11 +54,9 @@ func TestExtract(t *testing.T) {
 		{
 			name: "extract successful",
 			args: args{
-				ctx: ctx,
-				c:   defaultConfig(),
-				metadata: map[string]string{
-					"foo": "bar",
-				},
+				ctx:      ctx,
+				c:        defaultConfig(),
+				metadata: headers,
 			},
 			want:  bags,
 			want1: trace.SpanContext{},
@@ -96,12 +98,12 @@ func TestInject(t *testing.T) {
 	})
 
 	ctx = trace.ContextWithSpanContext(ctx, spanContext)
-	md := make(map[string]string)
+	md := &protocol.RequestHeader{}
 
 	type args struct {
 		ctx      context.Context
 		c        *Config
-		metadata map[string]string
+		metadata *protocol.RequestHeader
 	}
 	tests := []struct {
 		name string
@@ -120,51 +122,10 @@ func TestInject(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			Inject(tt.args.ctx, tt.args.c, tt.args.metadata)
 			assert.NotEmpty(t, tt.args.metadata)
-			assert.Equal(t, "01000000000000000000000000000000-0200000000000000-0", tt.args.metadata["b3"])
-			assert.Equal(t, "00-01000000000000000000000000000000-0200000000000000-00", tt.args.metadata["traceparent"])
-			assert.Equal(t, "0200000000000000", tt.args.metadata["ot-tracer-spanid"])
-			assert.Equal(t, "0000000000000000", tt.args.metadata["ot-tracer-traceid"])
-		})
-	}
-}
-
-func TestCGIVariableToHTTPHeaderMetadata(t *testing.T) {
-	type args struct {
-		metadata map[string]string
-	}
-	tests := []struct {
-		name string
-		args args
-		want map[string]string
-	}{
-		{
-			name: "HTTP2 CGI Variable",
-			args: args{
-				metadata: map[string]string{
-					"OT_BAGGAGE_SERVICE.NAME": "echo-client",
-				},
-			},
-			want: map[string]string{
-				"ot-baggage-service.name": "echo-client",
-			},
-		},
-		{
-			name: "TTHeader",
-			args: args{
-				metadata: map[string]string{
-					"ot-baggage-service.name": "echo-client",
-				},
-			},
-			want: map[string]string{
-				"ot-baggage-service.name": "echo-client",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := CGIVariableToHTTPHeaderMetadata(tt.args.metadata); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CGIVariableToHTTPHeaderMetadata() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, "01000000000000000000000000000000-0200000000000000-0", md.Get("b3"))
+			assert.Equal(t, "00-01000000000000000000000000000000-0200000000000000-00", md.Get("traceparent"))
+			assert.Equal(t, "0200000000000000", md.Get("ot-tracer-spanid"))
+			assert.Equal(t, "0000000000000000", md.Get("ot-tracer-traceid"))
 		})
 	}
 }

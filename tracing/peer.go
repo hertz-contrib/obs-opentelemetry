@@ -17,18 +17,15 @@ package tracing
 import (
 	"context"
 
-	"github.com/bytedance/gopkg/cloud/metainfo"
+	"github.com/cloudwego/hertz/pkg/protocol"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 )
 
-func injectPeerServiceToMetaInfo(ctx context.Context, attrs []attribute.KeyValue) map[string]string {
-	md := metainfo.GetAllValues(ctx)
-	if md == nil {
-		md = make(map[string]string)
-	}
-
+func injectPeerServiceToMetadata(_ context.Context, attrs []attribute.KeyValue) map[string]string {
 	serviceName, serviceNamespace, deploymentEnv := getServiceFromResourceAttributes(attrs)
+
+	md := make(map[string]string, 3)
 
 	if serviceName != "" {
 		md[string(semconv.ServiceNameKey)] = serviceName
@@ -45,18 +42,23 @@ func injectPeerServiceToMetaInfo(ctx context.Context, attrs []attribute.KeyValue
 	return md
 }
 
-func extractPeerServiceAttributesFromMetaInfo(md map[string]string) []attribute.KeyValue {
+func extractPeerServiceAttributesFromMetadata(headers *protocol.RequestHeader) []attribute.KeyValue {
 	var attrs []attribute.KeyValue
 
-	for k, v := range md {
-		switch k {
-		case string(semconv.ServiceNameKey):
-			attrs = append(attrs, semconv.PeerServiceKey.String(v))
-		case string(semconv.ServiceNamespaceKey):
-			attrs = append(attrs, PeerServiceNamespaceKey.String(v))
-		case string(semconv.DeploymentEnvironmentKey):
-			attrs = append(attrs, PeerDeploymentEnvironmentKey.String(v))
-		}
+	serviceName, serviceNamespace, deploymentEnv := headers.Get(string(semconv.ServiceNameKey)),
+		headers.Get(string(semconv.ServiceNamespaceKey)),
+		headers.Get(string(semconv.DeploymentEnvironmentKey))
+
+	if serviceName != "" {
+		attrs = append(attrs, semconv.PeerServiceKey.String(serviceName))
+	}
+
+	if serviceNamespace != "" {
+		attrs = append(attrs, PeerServiceNamespaceKey.String(serviceNamespace))
+	}
+
+	if deploymentEnv != "" {
+		attrs = append(attrs, PeerDeploymentEnvironmentKey.String(deploymentEnv))
 	}
 
 	return attrs

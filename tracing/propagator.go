@@ -17,7 +17,7 @@ package tracing
 import (
 	"context"
 
-	"github.com/bytedance/gopkg/cloud/metainfo"
+	"github.com/cloudwego/hertz/pkg/protocol"
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
@@ -27,57 +27,37 @@ var _ propagation.TextMapCarrier = &metadataProvider{}
 
 type metadataProvider struct {
 	metadata map[string]string
+	headers  *protocol.RequestHeader
 }
 
 // Get a value from metadata by key
 func (m *metadataProvider) Get(key string) string {
-	if v, ok := m.metadata[key]; ok {
-		return v
-	}
-	return ""
+	return m.headers.Get(key)
 }
 
 // Set a value to metadata by k/v
 func (m *metadataProvider) Set(key, value string) {
-	m.metadata[key] = value
+	m.headers.Set(key, value)
 }
 
 // Keys Iteratively get all keys of metadata
 func (m *metadataProvider) Keys() []string {
 	out := make([]string, 0, len(m.metadata))
-	for k := range m.metadata {
-		out = append(out, k)
-	}
+
+	m.headers.VisitAll(func(key, value []byte) {
+		out = append(out, string(key))
+	})
+
 	return out
 }
 
 // Inject injects span context into the kitex metadata info
-func Inject(ctx context.Context, c *Config, metadata map[string]string) {
-	c.textMapPropagator.Inject(ctx, &metadataProvider{metadata: metadata})
+func Inject(ctx context.Context, c *Config, headers *protocol.RequestHeader) {
+	c.textMapPropagator.Inject(ctx, &metadataProvider{headers: headers})
 }
 
 // Extract returns the baggage and span context
-func Extract(ctx context.Context, c *Config, metadata map[string]string) (baggage.Baggage, trace.SpanContext) {
-	ctx = c.textMapPropagator.Extract(ctx, &metadataProvider{metadata: metadata})
+func Extract(ctx context.Context, c *Config, headers *protocol.RequestHeader) (baggage.Baggage, trace.SpanContext) {
+	ctx = c.textMapPropagator.Extract(ctx, &metadataProvider{headers: headers})
 	return baggage.FromContext(ctx), trace.SpanContextFromContext(ctx)
-}
-
-// CGIVariableToHTTPHeaderMetadata converts all CGI variable into HTTP header key.
-// For example, `ABC_DEF` will be converted to `abc-def`.
-func CGIVariableToHTTPHeaderMetadata(metadata map[string]string) map[string]string {
-	res := make(map[string]string, len(metadata))
-	for k, v := range metadata {
-		res[metainfo.CGIVariableToHTTPHeader(k)] = v
-	}
-	return res
-}
-
-// HTTPHeaderToCGIVariableMetadata performs an CGI variable conversion.
-// For example, an HTTP header key `abc-def` will result in `ABC_DEF`.
-func HTTPHeaderToCGIVariableMetadata(metadata map[string]string) map[string]string {
-	res := make(map[string]string, len(metadata))
-	for k, v := range metadata {
-		res[metainfo.HTTPHeaderToCGIVariable(k)] = v
-	}
-	return res
 }

@@ -18,7 +18,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/bytedance/gopkg/cloud/metainfo"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/client"
 	"github.com/cloudwego/hertz/pkg/common/adaptor"
@@ -67,17 +66,15 @@ func ClientMiddleware(opts ...Option) client.Middleware {
 			defer span.End()
 
 			readOnlySpan := span.(trace.ReadOnlySpan)
-			// inject client service resource attributes (canonical service) to meta info
-			md := injectPeerServiceToMetaInfo(ctx, readOnlySpan.Resource().Attributes())
 
-			Inject(ctx, cfg, md)
+			// inject client service resource attributes (canonical service) to meta map
+			md := injectPeerServiceToMetadata(ctx, readOnlySpan.Resource().Attributes())
+
+			Inject(ctx, cfg, &req.Header)
 
 			for k, v := range md {
-				ctx = metainfo.WithValue(ctx, k, v)
+				req.Header.Set(k, v)
 			}
-
-			// set metainfo into http header
-			metainfo.ToHTTPHeader(ctx, &req.Header)
 
 			err = next(ctx, req, resp)
 
@@ -102,9 +99,7 @@ func ClientMiddleware(opts ...Option) client.Middleware {
 
 func ServerMiddleware(cfg *Config) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
-		ctx = metainfo.FromHTTPHeader(ctx, (*StringHeader)(&c.Request.Header))
-		ctx = metainfo.TransferForward(ctx)
-
+		// get tracer carrier
 		tc := internal.TraceCarrierFromContext(ctx)
 		if tc == nil {
 			hlog.CtxWarnf(ctx, "TraceCarrier not found in context")
@@ -112,7 +107,6 @@ func ServerMiddleware(cfg *Config) app.HandlerFunc {
 			return
 		}
 
-		// get tracer from carrier
 		sTracer := tc.Tracer()
 
 		ti := c.GetTraceInfo()
@@ -122,14 +116,12 @@ func ServerMiddleware(cfg *Config) app.HandlerFunc {
 			oteltrace.WithSpanKind(oteltrace.SpanKindServer),
 		}
 
-		md := metainfo.GetAllValues(ctx)
+		peerServiceAttributes := extractPeerServiceAttributesFromMetadata(&c.Request.Header)
 
-		// [Notice] cgi variable to http header
-		md = CGIVariableToHTTPHeaderMetadata(md)
+		// extract baggage and span context from header
+		bags, spanCtx := Extract(ctx, cfg, &c.Request.Header)
 
-		peerServiceAttributes := extractPeerServiceAttributesFromMetaInfo(md)
-
-		bags, spanCtx := Extract(ctx, cfg, md)
+		// set baggage
 		ctx = baggage.ContextWithBaggage(ctx, bags)
 
 		ctx, span := sTracer.Start(oteltrace.ContextWithRemoteSpanContext(ctx, spanCtx), spanNaming(c), opts...)
