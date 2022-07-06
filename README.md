@@ -11,7 +11,7 @@
 
 #### Tracing
 - [x] Support server and client hertz http tracing
-- [x] Support automatic transparent transmission of peer service through meta info
+- [x] Support automatic transparent transmission of peer service through http headers
 
 #### Metrics
 - [x] Support hertz http metrics [R.E.D]
