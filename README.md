@@ -212,6 +212,6 @@ maintained by: [CoderPoet](https://github.com/CoderPoet)
 | go.opentelemetry.io/otel/metric | v0.30.0 | ​<br /> |
 | go.opentelemetry.io/otel/semconv | v1.7.0 |  |
 | go.opentelemetry.io/contrib/instrumentation/runtime | v0.30.0 |  |
-| hertz | v0.3.1 |  |
+| hertz | v0.1.0 |  |
 
 
