@@ -19,5 +19,5 @@ package opentelemetry
 // Name and Version info of this sdk, used for statistics and debug
 const (
 	Name    = "obs-opentelemetry"
-	Version = "v0.1.0"
+	Version = "v0.1.1"
 )
