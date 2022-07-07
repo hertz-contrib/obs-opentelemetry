@@ -16,8 +16,6 @@ package provider
 
 import (
 	"go.opentelemetry.io/contrib/propagators/b3"
-	"go.opentelemetry.io/contrib/propagators/jaeger"
-	"go.opentelemetry.io/contrib/propagators/opencensus"
 	"go.opentelemetry.io/contrib/propagators/ot"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
@@ -72,8 +70,6 @@ func defaultConfig() *config {
 			propagation.NewCompositeTextMapPropagator(
 				b3.New(),
 				ot.OT{},
-				jaeger.Jaeger{},
-				opencensus.Binary{},
 				propagation.Baggage{},
 				propagation.TraceContext{},
 			),

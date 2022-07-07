@@ -16,6 +16,7 @@ package tracing
 
 import (
 	"context"
+	"strings"
 
 	"github.com/cloudwego/hertz/pkg/protocol"
 	"go.opentelemetry.io/otel/attribute"
@@ -28,15 +29,15 @@ func injectPeerServiceToMetadata(_ context.Context, attrs []attribute.KeyValue) 
 	md := make(map[string]string, 3)
 
 	if serviceName != "" {
-		md[string(semconv.ServiceNameKey)] = serviceName
+		md[semconvAttributeKeyToHTTPHeader(string(semconv.ServiceNameKey))] = serviceName
 	}
 
 	if serviceNamespace != "" {
-		md[string(semconv.ServiceNamespaceKey)] = serviceNamespace
+		md[semconvAttributeKeyToHTTPHeader(string(semconv.ServiceNamespaceKey))] = serviceNamespace
 	}
 
 	if deploymentEnv != "" {
-		md[string(semconv.DeploymentEnvironmentKey)] = deploymentEnv
+		md[semconvAttributeKeyToHTTPHeader(string(semconv.DeploymentEnvironmentKey))] = deploymentEnv
 	}
 
 	return md
@@ -45,9 +46,9 @@ func injectPeerServiceToMetadata(_ context.Context, attrs []attribute.KeyValue) 
 func extractPeerServiceAttributesFromMetadata(headers *protocol.RequestHeader) []attribute.KeyValue {
 	var attrs []attribute.KeyValue
 
-	serviceName, serviceNamespace, deploymentEnv := headers.Get(string(semconv.ServiceNameKey)),
-		headers.Get(string(semconv.ServiceNamespaceKey)),
-		headers.Get(string(semconv.DeploymentEnvironmentKey))
+	serviceName, serviceNamespace, deploymentEnv := headers.Get(semconvAttributeKeyToHTTPHeader(string(semconv.ServiceNameKey))),
+		headers.Get(semconvAttributeKeyToHTTPHeader(string(semconv.ServiceNamespaceKey))),
+		headers.Get(semconvAttributeKeyToHTTPHeader(string(semconv.DeploymentEnvironmentKey)))
 
 	if serviceName != "" {
 		attrs = append(attrs, semconv.PeerServiceKey.String(serviceName))
@@ -62,4 +63,8 @@ func extractPeerServiceAttributesFromMetadata(headers *protocol.RequestHeader) [
 	}
 
 	return attrs
+}
+
+func semconvAttributeKeyToHTTPHeader(key string) string {
+	return strings.ReplaceAll(key, ".", "-")
 }
