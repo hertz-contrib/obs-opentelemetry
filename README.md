@@ -1,5 +1,7 @@
 # opentelemetry (This is a community driven project)
 
+English | [中文](README_CN.md)
+
 [Opentelemetry](https://opentelemetry.io/) for [Hertz](https://github.com/cloudwego/hertz)
 
 ## Feature
