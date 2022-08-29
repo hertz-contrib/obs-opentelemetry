@@ -113,7 +113,7 @@ func NewOpenTelemetryProvider(opts ...Option) *otelProvider {
 		tracerProvider := cfg.sdkTracerProvider
 		if tracerProvider == nil {
 			tracerProvider = sdktrace.NewTracerProvider(
-				sdktrace.WithSampler(sdktrace.AlwaysSample()),
+				sdktrace.WithSampler(cfg.sampler),
 				sdktrace.WithResource(res),
 				sdktrace.WithSpanProcessor(bsp),
 			)
