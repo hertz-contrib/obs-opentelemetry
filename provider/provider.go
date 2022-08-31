@@ -31,7 +31,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 )
 
 type OtelProvider interface {
@@ -174,18 +173,16 @@ func newResource(cfg *config) *resource.Resource {
 		return cfg.resource
 	}
 
-	ctx := context.Background()
-	res, err := resource.New(ctx,
+	res, err := resource.New(
+		context.Background(),
 		resource.WithHost(),
 		resource.WithFromEnv(),
 		resource.WithProcessPID(),
 		resource.WithTelemetrySDK(),
-		resource.WithSchemaURL(semconv.SchemaURL),
 		resource.WithDetectors(cfg.resourceDetectors...),
 		resource.WithAttributes(cfg.resourceAttributes...),
 	)
 	if err != nil {
-		otel.Handle(err)
 		return resource.Default()
 	}
 	return res

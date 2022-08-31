@@ -101,6 +101,13 @@ func WithServiceNamespace(namespace string) Option {
 	})
 }
 
+// WithResourceAttribute configures resource attribute.
+func WithResourceAttribute(rAttr attribute.KeyValue) Option {
+	return option(func(cfg *config) {
+		cfg.resourceAttributes = append(cfg.resourceAttributes, rAttr)
+	})
+}
+
 // WithResourceAttributes configures resource attributes.
 func WithResourceAttributes(rAttrs []attribute.KeyValue) Option {
 	return option(func(cfg *config) {
