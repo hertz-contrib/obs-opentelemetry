@@ -3,7 +3,7 @@ module github.com/hertz-contrib/obs-opentelemetry/provider
 go 1.17
 
 require (
-	github.com/cloudwego/hertz v0.1.0
+	github.com/cloudwego/hertz v0.3.0
 	github.com/stretchr/testify v1.8.0
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.32.0
 	go.opentelemetry.io/contrib/propagators/b3 v1.9.0
