@@ -51,7 +51,7 @@ func (m *metadataProvider) Keys() []string {
 	return out
 }
 
-// Inject injects span context into the kitex metadata info
+// Inject injects span context into the hertz metadata info
 func Inject(ctx context.Context, c *Config, headers *protocol.RequestHeader) {
 	c.textMapPropagator.Inject(ctx, &metadataProvider{headers: headers})
 }
