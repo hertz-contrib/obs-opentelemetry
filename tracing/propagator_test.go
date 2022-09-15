@@ -23,8 +23,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/contrib/propagators/b3"
-	"go.opentelemetry.io/contrib/propagators/jaeger"
-	"go.opentelemetry.io/contrib/propagators/opencensus"
 	"go.opentelemetry.io/contrib/propagators/ot"
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/propagation"
@@ -80,8 +78,6 @@ func TestInject(t *testing.T) {
 		propagation.NewCompositeTextMapPropagator(
 			b3.New(),
 			ot.OT{},
-			jaeger.Jaeger{},
-			opencensus.Binary{},
 			propagation.Baggage{},
 			propagation.TraceContext{},
 		),
@@ -124,8 +120,6 @@ func TestInject(t *testing.T) {
 			assert.NotEmpty(t, tt.args.metadata)
 			assert.Equal(t, "01000000000000000000000000000000-0200000000000000-0", md.Get("b3"))
 			assert.Equal(t, "00-01000000000000000000000000000000-0200000000000000-00", md.Get("traceparent"))
-			assert.Equal(t, "0200000000000000", md.Get("ot-tracer-spanid"))
-			assert.Equal(t, "0000000000000000", md.Get("ot-tracer-traceid"))
 		})
 	}
 }
