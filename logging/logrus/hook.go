@@ -62,14 +62,16 @@ func (h *TraceHook) Fire(entry *logrus.Entry) error {
 	}
 
 	span := trace.SpanFromContext(entry.Context)
-	if !span.IsRecording() {
-		return nil
-	}
 
 	// attach span context to log entry data fields
 	entry.Data[traceIDKey] = span.SpanContext().TraceID()
 	entry.Data[spanIDKey] = span.SpanContext().SpanID()
 	entry.Data[traceFlagsKey] = span.SpanContext().TraceFlags()
+
+	// non recording spans do not support modifying
+	if !span.IsRecording() {
+		return nil
+	}
 
 	// attach log to span event attributes
 	attrs := []attribute.KeyValue{
