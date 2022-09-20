@@ -104,10 +104,6 @@ func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, k
 	var zlevel zapcore.Level
 	span := trace.SpanFromContext(ctx)
 
-	if !span.IsRecording() {
-		l.Logf(level, format, kvs...)
-		return
-	}
 	sl := l.l.With(
 		traceIDKey, span.SpanContext().TraceID(), spanIDKey, span.SpanContext().SpanID(), traceFlagsKey, span.SpanContext().TraceFlags())
 	switch level {
@@ -133,6 +129,10 @@ func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, k
 
 	msg := getMessage(format, kvs)
 
+	if !span.IsRecording() {
+		l.Logf(level, format, kvs...)
+		return
+	}
 	attrs := []attribute.KeyValue{
 		logMessageKey.String(msg),
 		logSeverityTextKey.String(OtelSeverityText(zlevel)),
