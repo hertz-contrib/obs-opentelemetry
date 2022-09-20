@@ -127,12 +127,13 @@ func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, k
 		sl.Warnf(format, kvs...)
 	}
 
-	msg := getMessage(format, kvs)
-
 	if !span.IsRecording() {
 		l.Logf(level, format, kvs...)
 		return
 	}
+
+	msg := getMessage(format, kvs)
+
 	attrs := []attribute.KeyValue{
 		logMessageKey.String(msg),
 		logSeverityTextKey.String(OtelSeverityText(zlevel)),
