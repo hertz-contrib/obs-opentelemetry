@@ -6,7 +6,7 @@ English | [中文](README_CN.md)
 
 ## Feature
 #### Provider
-- [x] Out-of-the-box  default opentelemetry provider
+- [x] Out-of-the-box default opentelemetry provider
 - [x] Support setting via environment variables
 
 ### Instrumentation
@@ -208,12 +208,11 @@ maintained by: [CoderPoet](https://github.com/CoderPoet)
 
 ## Dependencies
 | **Library/Framework** | **Versions** | **Notes** |
-| --- | --- | --- |
-| go.opentelemetry.io/otel | v1.7.0 | ​<br /> |
-| go.opentelemetry.io/otel/trace | v1.7.0 | ​<br /> |
-| go.opentelemetry.io/otel/metric | v0.30.0 | ​<br /> |
-| go.opentelemetry.io/otel/semconv | v1.7.0 |  |
+| --- |---------| --- |
+| go.opentelemetry.io/otel | v1.9.0  | <br /> |
+| go.opentelemetry.io/otel/trace | v1.9.0  | <br /> |
+| go.opentelemetry.io/otel/metric | v0.31.0 | <br /> |
 | go.opentelemetry.io/contrib/instrumentation/runtime | v0.30.0 |  |
-| hertz | v0.1.0 |  |
+| hertz | v0.3.0  |  |
 
 

@@ -2,31 +2,31 @@
 
 [English](README.md) | 中文
 
-适用于  [Hertz](https://github.com/cloudwego/hertz) 的 [Opentelemetry](https://opentelemetry.io/).
+适用于 [Hertz](https://github.com/cloudwego/hertz) 的 [Opentelemetry](https://opentelemetry.io/).
 
 ## 特性
 
-#### 提供者
+#### Provider
 
 - [x] 集成的默认 opentelemetry 程序，达到开箱即用
 - [x] 支持设置环境变量
 
-### 遥测工具
+### Instrumentation
 
-#### 链路追踪
+#### Tracing
 
-- [x] 支持在 hertz 服务端和客户端中的 http 链路追踪
-- [x] 支持通过 http header 自动透明传输对等服务
+- [x] 支持在 hertz 服务端和客户端之间启用 http 链路追踪
+- [x] 支持通过设置 http header 以启动自动透明地传输对端服务
 
 #### Metrics
-- [x] 支持Hertz http 指标 [Rate, Errors, Duration]
-- [x] 支持服务拓扑图度量[服务拓扑图]。
-- [x] 支持go runtime 度量
+- [x] 支持的 hertz http 指标有 [Rate, Errors, Duration]
+- [x] 支持服务拓扑图指标 [服务拓扑图]
+- [x] 支持 go runtime 指标
 
-#### 日志
+#### Logging
 
-- [x] 在logrus的基础上扩展 Hertz 日志工具 
-- [x] 实现跟踪自动关联日志
+- [x] 在 logrus 的基础上适配了 hertz 日志工具
+- [x] 实现了链路追踪自动关联日志的功能
 
 ## 通过环境变量来配置
 
@@ -92,7 +92,7 @@ func main(){
 
 ```
 
-##  追踪相关日志
+##  Tracing 和 Logging 进行关联
 
 ## 设置日志
 
@@ -108,7 +108,7 @@ func init()  {
 }
 ```
 
-#### 结合 context 使用日志
+#### 结合 context 使用 Logging
 
 ```go
 h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
@@ -122,17 +122,17 @@ h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 })
 ```
 
-#### 日志格式示例
+#### Logging 格式示例
 
 ```log
 {"level":"debug","msg":"message received successfully: my request","span_id":"445ef16484a171b8","time":"2022-07-04T06:27:35+08:00","trace_flags":"01","trace_id":"e9e579b32c9d6b0598f8f33d65689e06"}
 ```
 
-## 示例
+## 可以执行的示例
 
 [Executable Example](https://github.com/cloudwego/hertz-examples/tree/main/opentelemetry)
 
-## 现已支持的 Mertrics
+## 现已支持的 Metrics
 
 ### RPC Metrics
 
@@ -140,21 +140,21 @@ h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 
 下面的表格为 RPC server metric 的配置项。
 
-| 名称                   | 指标数据模型 | 单位     | 单位(UCUM) | 描述                  | 状态     | Streaming                                                    |
-|------|------------|------|-------------------------------------------|-------------|--------|-----------|
-| `http.server.duration` | Histogram    | 毫秒(ms) | `ms`       | 测量请求RPC的持续时间 | 推荐使用 | 并不适用， 虽然streaming RPC可能将这个指标记录为*批处理开始到批处理结束*，但在实际使用中很难解释。 |
+| 名称                   | Instrument   | Unit     | Unit (UCUM) | Description                 | Status    | Streaming                                                     |
+|------|-----------|------|-------------------------------------------|-------------|--------|---------------------------------------------------------------|
+| `http.server.duration` | Histogram | 毫秒(ms) | `ms`       | 测量请求RPC的持续时间 | 推荐使用 | 虽然 Streaming RPC <br/>可能将这个指标记录为*批处理开始到批处理结束*，但在使用中这个指标是很难解释。 |
 
 #### Hertz Client
 
 下面的表格为 RPC server metric 的配置项,这些适用于传统的RPC使用，不支持 streaming RPC
 
-| Name | Instrument | Unit | Unit (UCUM) | Description | Status | Streaming |
-|------|------------|------|-------------------------------------------|-------------|--------|-----------|
-| `http.client.duration` | Histogram  | millseconds | `ms`        | 测量请求RPC的持续时间 | 推荐使用 | 并不适用， 虽然streaming RPC可能将这个指标记录为*批处理开始到批处理结束*，但在实际使用中很难解释。 |
+| Name | Instrument | Unit | Unit (UCUM) | Description | Status | Streaming                                                |
+|------|------------|------|-------------------------------------------|-------------|--------|----------------------------------------------------------|
+| `http.client.duration` | Histogram  | 毫秒(ms) | `ms`        | 测量请求RPC的持续时间 | 推荐使用 | 虽然 Streaming RPC 可能将这个指标记录为*批处理开始到批处理结束*，但在使用中这个指标是很难解释。 |
 
 
 ### R.E.D
-R.E.D (Rate, Errors, Duration) 方法定义了你应该为你架构中的每个微服务测量的三个关键指标。我们可以根据`http.server.duration`来计算R.E.D。
+R.E.D (Rate, Errors, Duration) 定义了架构中的每个微服务测量的三个关键指标。OpenTelemetry 可以根据`http.server.duration`来计算R.E.D。
 
 #### Rate
 
@@ -221,12 +221,11 @@ OpenTelemetry的 sdk 与1.x opentelemetry-go完全兼容，[详情查看](https:
 
 ## 依赖
 
-| **库/框架**                                         | 版本    | 记录   |
-| --- | --- | --- |
-| go.opentelemetry.io/otel | v1.7.0 | <br /> |
-| go.opentelemetry.io/otel/trace | v1.7.0 | <br /> |
-| go.opentelemetry.io/otel/metric | v0.30.0 | <br /> |
-| go.opentelemetry.io/otel/semconv | v1.7.0 |  |
+| **库/框架**                                         | 版本      | 记录   |
+| --- |---------| --- |
+| go.opentelemetry.io/otel | v1.9.0  | <br /> |
+| go.opentelemetry.io/otel/trace | v1.9.0  | <br /> |
+| go.opentelemetry.io/otel/metric | v0.31.0 | <br /> |
 | go.opentelemetry.io/contrib/instrumentation/runtime | v0.30.0 |  |
-| hertz | v0.1.0 |  |
+| hertz | v0.3.0  |  |
 
