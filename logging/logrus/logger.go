@@ -16,16 +16,17 @@ package logrus
 
 import (
 	"context"
+	hlogrus "github.com/Skyenought/hertz-logging/logrus"
+	"github.com/sirupsen/logrus"
 	"io"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"github.com/sirupsen/logrus"
 )
 
 var _ hlog.FullLogger = (*Logger)(nil)
 
 type Logger struct {
-	l *logrus.Logger
+	l *hlogrus.Logger
 }
 
 func NewLogger(opts ...Option) *Logger {
@@ -37,20 +38,20 @@ func NewLogger(opts ...Option) *Logger {
 	}
 
 	// default trace hooks
-	cfg.hooks = append(cfg.hooks, NewTraceHook(cfg.traceHookConfig))
+	cfg.opts.Hooks = append(cfg.opts.Hooks, NewTraceHook(cfg.traceHookConfig))
 
 	// attach hook
-	for _, hook := range cfg.hooks {
-		cfg.logger.AddHook(hook)
+	for _, hook := range cfg.opts.Hooks {
+		cfg.opts.Logger.AddHook(hook)
 	}
 
 	return &Logger{
-		l: cfg.logger,
+		l: &hlogrus.Logger{L: cfg.opts.Logger},
 	}
 }
 
 func (l *Logger) Logger() *logrus.Logger {
-	return l.l
+	return l.l.L
 }
 
 func (l *Logger) Trace(v ...interface{}) {
@@ -110,31 +111,31 @@ func (l *Logger) Fatalf(format string, v ...interface{}) {
 }
 
 func (l *Logger) CtxTracef(ctx context.Context, format string, v ...interface{}) {
-	l.l.WithContext(ctx).Tracef(format, v...)
+	l.Logger().WithContext(ctx).Tracef(format, v...)
 }
 
 func (l *Logger) CtxDebugf(ctx context.Context, format string, v ...interface{}) {
-	l.l.WithContext(ctx).Debugf(format, v...)
+	l.Logger().WithContext(ctx).Debugf(format, v...)
 }
 
 func (l *Logger) CtxInfof(ctx context.Context, format string, v ...interface{}) {
-	l.l.WithContext(ctx).Infof(format, v...)
+	l.Logger().WithContext(ctx).Infof(format, v...)
 }
 
 func (l *Logger) CtxNoticef(ctx context.Context, format string, v ...interface{}) {
-	l.l.WithContext(ctx).Warnf(format, v...)
+	l.Logger().WithContext(ctx).Warnf(format, v...)
 }
 
 func (l *Logger) CtxWarnf(ctx context.Context, format string, v ...interface{}) {
-	l.l.WithContext(ctx).Warnf(format, v...)
+	l.Logger().WithContext(ctx).Warnf(format, v...)
 }
 
 func (l *Logger) CtxErrorf(ctx context.Context, format string, v ...interface{}) {
-	l.l.WithContext(ctx).Errorf(format, v...)
+	l.Logger().WithContext(ctx).Errorf(format, v...)
 }
 
 func (l *Logger) CtxFatalf(ctx context.Context, format string, v ...interface{}) {
-	l.l.WithContext(ctx).Fatalf(format, v...)
+	l.Logger().WithContext(ctx).Fatalf(format, v...)
 }
 
 func (l *Logger) SetLevel(level hlog.Level) {
@@ -155,7 +156,7 @@ func (l *Logger) SetLevel(level hlog.Level) {
 	default:
 		lv = logrus.WarnLevel
 	}
-	l.l.SetLevel(lv)
+	l.Logger().SetLevel(lv)
 }
 
 func (l *Logger) SetOutput(writer io.Writer) {

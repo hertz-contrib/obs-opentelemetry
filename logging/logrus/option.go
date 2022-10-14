@@ -15,6 +15,7 @@
 package logrus
 
 import (
+	hlogrus "github.com/Skyenought/hertz-logging/logrus"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,9 +30,7 @@ func (fn option) apply(cfg *config) {
 }
 
 type config struct {
-	logger *logrus.Logger
-	hooks  []logrus.Hook
-
+	opts            *hlogrus.Options
 	traceHookConfig *TraceHookConfig
 }
 
@@ -42,8 +41,10 @@ func defaultConfig() *config {
 	stdLogger.SetFormatter(new(logrus.JSONFormatter))
 
 	return &config{
-		logger: logrus.StandardLogger(),
-		hooks:  []logrus.Hook{},
+		opts: &hlogrus.Options{
+			Logger: logrus.StandardLogger(),
+			Hooks:  []logrus.Hook{},
+		},
 		traceHookConfig: &TraceHookConfig{
 			recordStackTraceInSpan: true,
 			enableLevels:           logrus.AllLevels,
@@ -54,13 +55,13 @@ func defaultConfig() *config {
 
 func WithLogger(logger *logrus.Logger) Option {
 	return option(func(cfg *config) {
-		cfg.logger = logger
+		cfg.opts.Logger = logger
 	})
 }
 
 func WithHook(hook logrus.Hook) Option {
 	return option(func(cfg *config) {
-		cfg.hooks = append(cfg.hooks, hook)
+		cfg.opts.Hooks = append(cfg.opts.Hooks, hook)
 	})
 }
 
