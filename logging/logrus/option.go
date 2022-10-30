@@ -18,6 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Option logrus hook option
 type Option interface {
 	apply(cfg *config)
 }
@@ -52,36 +53,42 @@ func defaultConfig() *config {
 	}
 }
 
+// WithLogger configures logger
 func WithLogger(logger *logrus.Logger) Option {
 	return option(func(cfg *config) {
 		cfg.logger = logger
 	})
 }
 
+// WithHook configures hook
 func WithHook(hook logrus.Hook) Option {
 	return option(func(cfg *config) {
 		cfg.hooks = append(cfg.hooks, hook)
 	})
 }
 
+// WithTraceHookConfig configures trace hook config
 func WithTraceHookConfig(hookConfig *TraceHookConfig) Option {
 	return option(func(cfg *config) {
 		cfg.traceHookConfig = hookConfig
 	})
 }
 
+// WithTraceHookLevels configures hook levels
 func WithTraceHookLevels(levels []logrus.Level) Option {
 	return option(func(cfg *config) {
 		cfg.traceHookConfig.enableLevels = levels
 	})
 }
 
+// WithTraceHookErrorSpanLevel configures trace hook error span level
 func WithTraceHookErrorSpanLevel(level logrus.Level) Option {
 	return option(func(cfg *config) {
 		cfg.traceHookConfig.errorSpanLevel = level
 	})
 }
 
+// WithRecordStackTraceInSpan configures whether record stack trace in span
 func WithRecordStackTraceInSpan(recordStackTraceInSpan bool) Option {
 	return option(func(cfg *config) {
 		cfg.traceHookConfig.recordStackTraceInSpan = recordStackTraceInSpan

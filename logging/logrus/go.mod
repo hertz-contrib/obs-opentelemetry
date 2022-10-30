@@ -2,8 +2,11 @@ module github.com/hertz-contrib/obs-opentelemetry/logging/logrus
 
 go 1.17
 
+replace github.com/hertz-contrib/logger/logrus => github.com/CoderPoet/logger/logrus v0.0.0-20221030110852-9f9efbc6c387
+
 require (
-	github.com/cloudwego/hertz v0.3.0
+	github.com/cloudwego/hertz v0.4.0
+	github.com/hertz-contrib/logger/logrus v0.0.0-00010101000000-000000000000
 	github.com/sirupsen/logrus v1.9.0
 	go.opentelemetry.io/otel v1.9.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.9.0
