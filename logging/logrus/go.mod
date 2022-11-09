@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/cloudwego/hertz v0.4.0
-	github.com/hertz-contrib/logger/logrus v0.0.0-20221031025953-6627fc35899e
+	github.com/hertz-contrib/logger/logrus v1.0.0
 	github.com/sirupsen/logrus v1.9.0
 	go.opentelemetry.io/otel v1.9.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.9.0

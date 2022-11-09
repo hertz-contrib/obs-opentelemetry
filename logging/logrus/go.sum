@@ -22,8 +22,8 @@ github.com/google/go-cmp v0.5.8/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeN
 github.com/henrylee2cn/ameda v1.4.8/go.mod h1:liZulR8DgHxdK+MEwvZIylGnmcjzQ6N6f2PlWe7nEO4=
 github.com/henrylee2cn/ameda v1.4.10/go.mod h1:liZulR8DgHxdK+MEwvZIylGnmcjzQ6N6f2PlWe7nEO4=
 github.com/henrylee2cn/goutil v0.0.0-20210127050712-89660552f6f8/go.mod h1:Nhe/DM3671a5udlv2AdV2ni/MZzgfv2qrPL5nIi3EGQ=
-github.com/hertz-contrib/logger/logrus v0.0.0-20221031025953-6627fc35899e h1:0Sl+ViY93kK87s8J3gAvM+tMU+7M3FCAzfA47m6lKHE=
-github.com/hertz-contrib/logger/logrus v0.0.0-20221031025953-6627fc35899e/go.mod h1:SqDYLwVq5hTItYqimgZQbFCYPOIGNvBTq0Ip2OQwMcY=
+github.com/hertz-contrib/logger/logrus v1.0.0 h1:OeyYIGtMcn38W5e6XilogTVRIJVHbbcNC9Uk/mRHpgU=
+github.com/hertz-contrib/logger/logrus v1.0.0/go.mod h1:SqDYLwVq5hTItYqimgZQbFCYPOIGNvBTq0Ip2OQwMcY=
 github.com/klauspost/cpuid/v2 v2.0.9/go.mod h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa0213Md/qVLRg=
 github.com/nyaruka/phonenumbers v1.0.55/go.mod h1:sDaTZ/KPX5f8qyV9qN+hIm+4ZBARJrupC6LuhshJq1U=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
