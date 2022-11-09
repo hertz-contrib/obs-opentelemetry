@@ -65,10 +65,6 @@ func TestLogger(t *testing.T) {
 	ctx, span := tracer.Start(ctx, "root")
 
 	hlog.SetLogger(logger)
-	hlog.SetLevel(hlog.LevelError)
-	hlog.SetLevel(hlog.LevelWarn)
-	hlog.SetLevel(hlog.LevelInfo)
-	hlog.SetLevel(hlog.LevelDebug)
 	hlog.SetLevel(hlog.LevelTrace)
 
 	hlog.Trace("trace")
