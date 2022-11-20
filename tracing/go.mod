@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/bytedance/gopkg v0.0.0-20220623074550-9d6d3df70991
-	github.com/cloudwego/hertz v0.3.0
+	github.com/cloudwego/hertz v0.4.1
 	github.com/stretchr/testify v1.8.0
 	go.opentelemetry.io/contrib/propagators/b3 v1.9.0
 	go.opentelemetry.io/contrib/propagators/ot v1.9.0
@@ -16,10 +16,11 @@ require (
 
 require (
 	github.com/bytedance/go-tagexpr/v2 v2.9.2 // indirect
-	github.com/bytedance/sonic v1.3.0 // indirect
+	github.com/bytedance/sonic v1.5.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20211019084208-fb5309c8db06 // indirect
-	github.com/cloudwego/netpoll v0.2.4 // indirect
+	github.com/cloudwego/netpoll v0.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/protobuf v1.5.0 // indirect
@@ -35,7 +36,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
-	golang.org/x/sys v0.0.0-20220110181412-a018aaa089fe // indirect
+	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

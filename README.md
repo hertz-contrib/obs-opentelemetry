@@ -127,24 +127,24 @@ h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 
 ## Supported Metrics
 
-### RPC Metrics
+### HTTP Request Metrics
 
 #### Hertz Server
 
-Below is a table of RPC server metric instruments.
+Below is a table of HTTP server metric instruments.
 
-| Name | Instrument | Unit | Unit (UCUM) | Description | Status | Streaming |
-|------|------------|------|-------------------------------------------|-------------|--------|-----------|
-| `http.server.duration` | Histogram  | milliseconds | `ms` | measures duration of inbound RPC | Recommended | N/A.  While streaming RPCs may record this metric as start-of-batch to end-of-batch, it's hard to interpret in practice. |
+| Name                          | Instrument Type | Unit        | Unit  | Description                                                                  |
+|-------------------------------|---------------------------------------------------|--------------|-------------------------------------------|------------------------------------------------------------------------------|
+| `http.server.duration`        | Histogram                                         | milliseconds | `ms`                                      | measures the duration inbound HTTP requests |
+
 
 #### Hertz Client
 
-Below is a table of RPC client metric instruments.  These apply to traditional
-RPC usage, not streaming RPCs.
+Below is a table of HTTP client metric instruments.
 
-| Name | Instrument | Unit | Unit (UCUM) | Description | Status | Streaming |
-|------|------------|------|-------------------------------------------|-------------|--------|-----------|
-| `http.client.duration` | Histogram | milliseconds | `ms` | measures duration of outbound RPC | Recommended | N/A.  While streaming RPCs may record this metric as start-of-batch to end-of-batch, it's hard to interpret in practice. |
+| Name                        | Instrument Type ([*](README.md#instrument-types)) | Unit         | Unit ([UCUM](README.md#instrument-units)) | Description                                              |
+|-----------------------------|---------------------------------------------------|--------------|-------------------------------------------|----------------------------------------------------------|
+| `http.client.duration`      | Histogram                                         | milliseconds | `ms`                                      | measures the duration outbound HTTP requests             |
 
 
 ### R.E.D
@@ -187,7 +187,7 @@ sum(rate(http_server_duration_count{}[5m])) by (service_name, peer_service)
 | `process.runtime.go.gc.count` | Sum | - | - | Number of completed garbage collection cycles. |
 | `process.runtime.go.gc.pause_ns` | Histogram | nanosecond | `ns` | Amount of nanoseconds in GC stop-the-world pauses. |
 | `process.runtime.go.gc.pause_total_ns` | Histogram | nanosecond | `ns` | Cumulative nanoseconds in GC stop-the-world pauses since the program started. |
-| `process.runtime.go.goroutines` | Gauge | - | - | measures duration of outbound RPC. | 
+| `process.runtime.go.goroutines` | Gauge | - | - | measures duration of outbound HTTP Request. | 
 | `process.runtime.go.lookups` | Sum | - | - | Number of pointer lookups performed by the runtime. |
 | `process.runtime.go.mem.heap_alloc` | Gauge | bytes | `bytes` | Bytes of allocated heap objects. |
 | `process.runtime.go.mem.heap_idle` | Gauge | bytes | `bytes` | Bytes in idle (unused) spans. |
@@ -213,6 +213,6 @@ maintained by: [CoderPoet](https://github.com/CoderPoet)
 | go.opentelemetry.io/otel/trace | v1.9.0  | <br /> |
 | go.opentelemetry.io/otel/metric | v0.31.0 | <br /> |
 | go.opentelemetry.io/contrib/instrumentation/runtime | v0.30.0 |  |
-| hertz | v0.3.0  |  |
+| hertz | v0.4.1  |  |
 
 
