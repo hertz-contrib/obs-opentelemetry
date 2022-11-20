@@ -134,23 +134,23 @@ h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 
 ## 现已支持的 Metrics
 
-### RPC Metrics
+### HTTP Request Metrics
 
 #### Hertz Server
 
-下面的表格为 RPC server metric 的配置项。
+下表列出了 HTTP 服务的指标
 
-| 名称                   | Instrument   | Unit     | Unit (UCUM) | Description                 | Status    | Streaming                                                     |
-|------|-----------|------|-------------------------------------------|-------------|--------|---------------------------------------------------------------|
-| `http.server.duration` | Histogram | 毫秒(ms) | `ms`       | 测量请求RPC的持续时间 | 推荐使用 | 虽然 Streaming RPC <br/>可能将这个指标记录为*批处理开始到批处理结束*，但在使用中这个指标是很难解释。 |
+| 名称                          | Instrument Type | 单位        | 单位  | 描述                                                                  |
+|-------------------------------|---------------------------------------------------|--------------|-------------------------------------------|------------------------------------------------------------------------------|
+| `http.server.duration`        | Histogram                                         | milliseconds | `ms`                                      | 测量入站 HTTP 请求的耗时 |
 
 #### Hertz Client
 
-下面的表格为 RPC server metric 的配置项,这些适用于传统的RPC使用，不支持 streaming RPC
+下表列出了 HTTP 客户端指标
 
-| Name | Instrument | Unit | Unit (UCUM) | Description | Status | Streaming                                                |
-|------|------------|------|-------------------------------------------|-------------|--------|----------------------------------------------------------|
-| `http.client.duration` | Histogram  | 毫秒(ms) | `ms`        | 测量请求RPC的持续时间 | 推荐使用 | 虽然 Streaming RPC 可能将这个指标记录为*批处理开始到批处理结束*，但在使用中这个指标是很难解释。 |
+| 名称                        | Instrument Type | 单位         | 单位 （UCUM） | 描述                                              |
+|-----------------------------|---------------------------------------------------|--------------|-------------------------------------------|----------------------------------------------------------|
+| `http.client.duration`      | Histogram                                         | milliseconds | `ms`                                      | 测量出站 HTTP 请求的耗时            |
 
 
 ### R.E.D
@@ -227,5 +227,5 @@ OpenTelemetry的 sdk 与1.x opentelemetry-go完全兼容，[详情查看](https:
 | go.opentelemetry.io/otel/trace | v1.9.0  | <br /> |
 | go.opentelemetry.io/otel/metric | v0.31.0 | <br /> |
 | go.opentelemetry.io/contrib/instrumentation/runtime | v0.30.0 |  |
-| hertz | v0.3.0  |  |
+| hertz | v0.4.1  |  |
 
