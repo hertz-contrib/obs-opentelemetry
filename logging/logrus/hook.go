@@ -38,24 +38,29 @@ var (
 
 var _ logrus.Hook = (*TraceHook)(nil)
 
+// TraceHookConfig trace hook config
 type TraceHookConfig struct {
 	recordStackTraceInSpan bool
 	enableLevels           []logrus.Level
 	errorSpanLevel         logrus.Level
 }
 
+// TraceHook trace hook
 type TraceHook struct {
 	cfg *TraceHookConfig
 }
 
+// NewTraceHook create trace hook
 func NewTraceHook(cfg *TraceHookConfig) *TraceHook {
 	return &TraceHook{cfg: cfg}
 }
 
+// Levels get levels
 func (h *TraceHook) Levels() []logrus.Level {
 	return h.cfg.enableLevels
 }
 
+// Fire logrus hook fire
 func (h *TraceHook) Fire(entry *logrus.Entry) error {
 	if entry.Context == nil {
 		return nil
