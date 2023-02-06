@@ -39,9 +39,10 @@ type config struct {
 	enableTracing bool
 	enableMetrics bool
 
-	exportInsecure bool
-	exportEndpoint string
-	exportHeaders  map[string]string
+	exportInsecure          bool
+	exportEnableCompression bool
+	exportEndpoint          string
+	exportHeaders           map[string]string
 
 	resource          *resource.Resource
 	sdkTracerProvider *sdktrace.TracerProvider
@@ -168,6 +169,13 @@ func WithHeaders(headers map[string]string) Option {
 func WithInsecure() Option {
 	return option(func(cfg *config) {
 		cfg.exportInsecure = true
+	})
+}
+
+// WithEnableCompression enable gzip transport compression
+func WithEnableCompression() Option {
+	return option(func(cfg *config) {
+		cfg.exportEnableCompression = true
 	})
 }
 
