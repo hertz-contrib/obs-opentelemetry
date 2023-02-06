@@ -95,6 +95,9 @@ func NewOpenTelemetryProvider(opts ...Option) *otelProvider {
 		if cfg.exportInsecure {
 			traceClientOpts = append(traceClientOpts, otlptracegrpc.WithInsecure())
 		}
+		if cfg.exportEnableCompression {
+			traceClientOpts = append(traceClientOpts, otlptracegrpc.WithCompressor("gzip"))
+		}
 
 		traceClient := otlptracegrpc.NewClient(traceClientOpts...)
 
@@ -135,6 +138,9 @@ func NewOpenTelemetryProvider(opts ...Option) *otelProvider {
 		}
 		if cfg.exportInsecure {
 			metricsClientOpts = append(metricsClientOpts, otlpmetricgrpc.WithInsecure())
+		}
+		if cfg.exportEnableCompression {
+			metricsClientOpts = append(metricsClientOpts, otlpmetricgrpc.WithCompressor("gzip"))
 		}
 
 		// metrics client
