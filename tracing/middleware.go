@@ -25,7 +25,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol"
 	"github.com/hertz-contrib/obs-opentelemetry/tracing/internal"
 	"go.opentelemetry.io/otel/baggage"
-	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
+	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 	oteltrace "go.opentelemetry.io/otel/trace"
@@ -43,9 +43,9 @@ func (sh *StringHeader) Visit(f func(k, v string)) {
 
 func ClientMiddleware(opts ...Option) client.Middleware {
 	cfg := newConfig(opts)
-	histogramRecorder := make(map[string]syncfloat64.Histogram)
+	histogramRecorder := make(map[string]instrument.Float64Histogram)
 
-	clientLatencyMeasure, err := cfg.meter.SyncFloat64().Histogram(ClientLatency)
+	clientLatencyMeasure, err := cfg.meter.Float64Histogram(ClientLatency)
 	handleErr(err)
 
 	histogramRecorder[ClientLatency] = clientLatencyMeasure

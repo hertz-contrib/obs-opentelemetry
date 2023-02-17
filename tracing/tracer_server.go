@@ -27,7 +27,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
 	"github.com/hertz-contrib/obs-opentelemetry/tracing/internal"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
+	"go.opentelemetry.io/otel/metric/instrument"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 	oteltrace "go.opentelemetry.io/otel/trace"
 )
@@ -36,14 +36,14 @@ var _ tracer.Tracer = (*serverTracer)(nil)
 
 type serverTracer struct {
 	config            *Config
-	histogramRecorder map[string]syncfloat64.Histogram
+	histogramRecorder map[string]instrument.Float64Histogram
 }
 
 func NewServerTracer(opts ...Option) (serverconfig.Option, *Config) {
 	cfg := newConfig(opts)
 	st := &serverTracer{
 		config:            cfg,
-		histogramRecorder: make(map[string]syncfloat64.Histogram),
+		histogramRecorder: make(map[string]instrument.Float64Histogram),
 	}
 
 	st.createMeasures()
@@ -52,7 +52,7 @@ func NewServerTracer(opts ...Option) (serverconfig.Option, *Config) {
 }
 
 func (s *serverTracer) createMeasures() {
-	serverLatencyMeasure, err := s.config.meter.SyncFloat64().Histogram(ServerLatency)
+	serverLatencyMeasure, err := s.config.meter.Float64Histogram(ServerLatency)
 	handleErr(err)
 
 	s.histogramRecorder[ServerLatency] = serverLatencyMeasure
@@ -108,6 +108,7 @@ func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
 		semconv.NetPeerIPKey.String(c.ClientIP()),
 		semconv.HTTPClientIPKey.String(c.ClientIP()),
 		semconv.HTTPTargetKey.String(string(c.URI().PathOriginal())),
+		semconv.HTTPStatusCodeKey.Int(c.Response.StatusCode()),
 	}
 
 	span.SetAttributes(attrs...)
