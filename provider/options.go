@@ -19,6 +19,7 @@ import (
 	"go.opentelemetry.io/contrib/propagators/ot"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
@@ -53,6 +54,8 @@ type config struct {
 	resourceDetectors  []resource.Detector
 
 	textMapPropagator propagation.TextMapPropagator
+
+	meterProvider *metric.MeterProvider
 }
 
 func newConfig(opts []Option) *config {
@@ -190,5 +193,12 @@ func WithSampler(sampler sdktrace.Sampler) Option {
 func WithSdkTracerProvider(sdkTracerProvider *sdktrace.TracerProvider) Option {
 	return option(func(cfg *config) {
 		cfg.sdkTracerProvider = sdkTracerProvider
+	})
+}
+
+// WithMeterProvider configures MeterProvider
+func WithMeterProvider(meterProvider *metric.MeterProvider) Option {
+	return option(func(cfg *config) {
+		cfg.meterProvider = meterProvider
 	})
 }

@@ -44,6 +44,7 @@ var (
 		semconv.HTTPHostKey,
 		semconv.HTTPRouteKey,
 		semconv.HTTPMethodKey,
+		semconv.HTTPStatusCodeKey,
 	}
 
 	PeerMetricsAttributes = []attribute.Key{
