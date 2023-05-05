@@ -15,7 +15,7 @@
 package tracing
 
 func Version() string {
-	return "0.36.0"
+	return "0.38.0"
 }
 
 func SemVersion() string {

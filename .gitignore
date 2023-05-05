@@ -1,3 +1,7 @@
 .idea
 pkg/app/fs.go.hertz.gz
 coverage.out
+
+# go workspace
+go.work
+go.work.sum
