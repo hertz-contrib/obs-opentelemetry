@@ -1,17 +1,17 @@
 module github.com/hertz-contrib/obs-opentelemetry/tracing
 
-go 1.17
+go 1.19
 
 require (
 	github.com/bytedance/gopkg v0.0.0-20221122125632-68358b8ecec6
-	github.com/cloudwego/hertz v0.6.2
-	github.com/stretchr/testify v1.8.2
-	go.opentelemetry.io/contrib/propagators/b3 v1.16.0
-	go.opentelemetry.io/contrib/propagators/ot v1.16.0
-	go.opentelemetry.io/otel v1.15.0
-	go.opentelemetry.io/otel/metric v0.38.0
-	go.opentelemetry.io/otel/sdk v1.15.0
-	go.opentelemetry.io/otel/trace v1.15.0
+	github.com/cloudwego/hertz v0.6.4
+	github.com/stretchr/testify v1.8.3
+	go.opentelemetry.io/contrib/propagators/b3 v1.17.0
+	go.opentelemetry.io/contrib/propagators/ot v1.17.0
+	go.opentelemetry.io/otel v1.16.0
+	go.opentelemetry.io/otel/metric v1.16.0
+	go.opentelemetry.io/otel/sdk v1.16.0
+	go.opentelemetry.io/otel/trace v1.16.0
 )
 
 require (
@@ -37,7 +37,7 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.2.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
