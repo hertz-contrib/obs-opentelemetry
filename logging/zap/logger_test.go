@@ -23,6 +23,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/zap"
@@ -110,18 +111,22 @@ func TestLogger(t *testing.T) {
 
 	span.End()
 
-	ctx, child := tracer.Start(ctx, "child")
-
-	hlog.CtxWarnf(ctx, "foo %s", "bar")
+	ctx, child1 := tracer.Start(ctx, "child1")
 
 	hlog.CtxTracef(ctx, "trace %s", "this is a trace log")
 	hlog.CtxDebugf(ctx, "debug %s", "this is a debug log")
 	hlog.CtxInfof(ctx, "info %s", "this is a info log")
+
+	child1.End()
+	assert.Equal(t, codes.Unset, child1.(sdktrace.ReadOnlySpan).Status().Code)
+
+	ctx, child2 := tracer.Start(ctx, "child2")
 	hlog.CtxNoticef(ctx, "notice %s", "this is a notice log")
 	hlog.CtxWarnf(ctx, "warn %s", "this is a warn log")
 	hlog.CtxErrorf(ctx, "error %s", "this is a error log")
 
-	child.End()
+	child2.End()
+	assert.Equal(t, codes.Error, child2.(sdktrace.ReadOnlySpan).Status().Code)
 
 	_, errSpan := tracer.Start(ctx, "error")
 
