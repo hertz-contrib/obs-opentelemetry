@@ -23,7 +23,7 @@ import (
 
 const (
 	instrumentationName          = "github.com/hertz-contrib/obs-opentelemetry"
-	traceIDNameForResponseHeader = "x-b3-traceid"
+	defaultTraceIDResponseHeader = "x-b3-traceid"
 )
 
 // Option opts for opentelemetry tracer provider
@@ -75,7 +75,7 @@ func defaultConfig() *Config {
 		tracerProvider:        otel.GetTracerProvider(),
 		meterProvider:         otel.GetMeterProvider(),
 		textMapPropagator:     otel.GetTextMapPropagator(),
-		traceIDResponseHeader: traceIDNameForResponseHeader,
+		traceIDResponseHeader: defaultTraceIDResponseHeader,
 	}
 }
 
