@@ -22,7 +22,8 @@ import (
 )
 
 const (
-	instrumentationName = "github.com/hertz-contrib/obs-opentelemetry"
+	instrumentationName          = "github.com/hertz-contrib/obs-opentelemetry"
+	traceIDNameForResponseHeader = "x-b3-traceid"
 )
 
 // Option opts for opentelemetry tracer provider
@@ -46,6 +47,7 @@ type Config struct {
 
 	recordSourceOperation       bool
 	enableTraceIDResponseHeader bool
+	traceIDResponseHeader       string
 }
 
 func newConfig(opts []Option) *Config {
@@ -70,9 +72,10 @@ func newConfig(opts []Option) *Config {
 
 func defaultConfig() *Config {
 	return &Config{
-		tracerProvider:    otel.GetTracerProvider(),
-		meterProvider:     otel.GetMeterProvider(),
-		textMapPropagator: otel.GetTextMapPropagator(),
+		tracerProvider:        otel.GetTracerProvider(),
+		meterProvider:         otel.GetMeterProvider(),
+		textMapPropagator:     otel.GetTextMapPropagator(),
+		traceIDResponseHeader: traceIDNameForResponseHeader,
 	}
 }
 
@@ -97,3 +100,9 @@ func WithEnableTraceIDResponseHeader(enable bool) Option {
 	})
 }
 
+// WithTraceIDResponseHeader configures trace id response header name
+func WithTraceIDResponseHeader(name string) Option {
+	return option(func(cfg *Config) {
+		cfg.traceIDResponseHeader = name
+	})
+}
