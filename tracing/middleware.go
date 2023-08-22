@@ -135,7 +135,9 @@ func ServerMiddleware(cfg *Config) app.HandlerFunc {
 
 		c.Next(ctx)
 
-		// Add trace ID to the response header.
-		c.Header("trace-id", oteltrace.SpanFromContext(ctx).SpanContext().TraceID().String())
+		if cfg.enableTraceIDResponseHeader {
+			// Add trace ID to the response header.
+			c.Header("trace-id", oteltrace.SpanFromContext(ctx).SpanContext().TraceID().String())
+		}
 	}
 }

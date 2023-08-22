@@ -44,7 +44,8 @@ type Config struct {
 	meterProvider     metric.MeterProvider
 	textMapPropagator propagation.TextMapPropagator
 
-	recordSourceOperation bool
+	recordSourceOperation       bool
+	enableTraceIDResponseHeader bool
 }
 
 func newConfig(opts []Option) *Config {
@@ -88,3 +89,11 @@ func WithTextMapPropagator(p propagation.TextMapPropagator) Option {
 		cfg.textMapPropagator = p
 	})
 }
+
+// WithEnableTraceIDResponseHeader configures enables trace id response header
+func WithEnableTraceIDResponseHeader(enable bool) Option {
+	return option(func(cfg *Config) {
+		cfg.enableTraceIDResponseHeader = enable
+	})
+}
+
