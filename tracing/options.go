@@ -23,7 +23,7 @@ import (
 
 const (
 	instrumentationName          = "github.com/hertz-contrib/obs-opentelemetry"
-	defaultTraceIDResponseHeader = "x-b3-traceid"
+	defaultTraceIDResponseHeader = "trace-id"
 )
 
 // Option opts for opentelemetry tracer provider
