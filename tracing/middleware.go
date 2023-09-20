@@ -134,5 +134,10 @@ func ServerMiddleware(cfg *Config) app.HandlerFunc {
 		tc.SetSpan(span)
 
 		c.Next(ctx)
+
+		if cfg.customResponseHandler != nil {
+			// execute custom response handler
+			cfg.customResponseHandler(ctx, c)
+		}
 	}
 }

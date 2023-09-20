@@ -15,6 +15,9 @@
 package tracing
 
 import (
+	"context"
+
+	"github.com/cloudwego/hertz/pkg/app"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
@@ -45,6 +48,8 @@ type Config struct {
 	textMapPropagator propagation.TextMapPropagator
 
 	recordSourceOperation bool
+
+	customResponseHandler app.HandlerFunc
 }
 
 func newConfig(opts []Option) *Config {
@@ -69,9 +74,10 @@ func newConfig(opts []Option) *Config {
 
 func defaultConfig() *Config {
 	return &Config{
-		tracerProvider:    otel.GetTracerProvider(),
-		meterProvider:     otel.GetMeterProvider(),
-		textMapPropagator: otel.GetTextMapPropagator(),
+		tracerProvider:        otel.GetTracerProvider(),
+		meterProvider:         otel.GetMeterProvider(),
+		textMapPropagator:     otel.GetTextMapPropagator(),
+		customResponseHandler: func(c context.Context, ctx *app.RequestContext) {},
 	}
 }
 
@@ -86,5 +92,12 @@ func WithRecordSourceOperation(recordSourceOperation bool) Option {
 func WithTextMapPropagator(p propagation.TextMapPropagator) Option {
 	return option(func(cfg *Config) {
 		cfg.textMapPropagator = p
+	})
+}
+
+// WithCustomResponseHandler configures CustomResponseHandler
+func WithCustomResponseHandler(h app.HandlerFunc) Option {
+	return option(func(cfg *Config) {
+		cfg.customResponseHandler = h
 	})
 }
