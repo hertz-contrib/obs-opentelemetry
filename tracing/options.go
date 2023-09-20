@@ -15,6 +15,9 @@
 package tracing
 
 import (
+	"context"
+
+	"github.com/cloudwego/hertz/pkg/app"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
@@ -22,8 +25,7 @@ import (
 )
 
 const (
-	instrumentationName          = "github.com/hertz-contrib/obs-opentelemetry"
-	defaultTraceIDResponseHeader = "trace-id"
+	instrumentationName = "github.com/hertz-contrib/obs-opentelemetry"
 )
 
 // Option opts for opentelemetry tracer provider
@@ -45,9 +47,9 @@ type Config struct {
 	meterProvider     metric.MeterProvider
 	textMapPropagator propagation.TextMapPropagator
 
-	recordSourceOperation       bool
-	enableTraceIDResponseHeader bool
-	traceIDResponseHeader       string
+	recordSourceOperation bool
+
+	customResponseHandler app.HandlerFunc
 }
 
 func newConfig(opts []Option) *Config {
@@ -75,7 +77,7 @@ func defaultConfig() *Config {
 		tracerProvider:        otel.GetTracerProvider(),
 		meterProvider:         otel.GetMeterProvider(),
 		textMapPropagator:     otel.GetTextMapPropagator(),
-		traceIDResponseHeader: defaultTraceIDResponseHeader,
+		customResponseHandler: func(c context.Context, ctx *app.RequestContext) {},
 	}
 }
 
@@ -93,16 +95,9 @@ func WithTextMapPropagator(p propagation.TextMapPropagator) Option {
 	})
 }
 
-// WithEnableTraceIDResponseHeader configures enables trace id response header
-func WithEnableTraceIDResponseHeader(enable bool) Option {
+// WithCustomResponseHandler configures CustomResponseHandler
+func WithCustomResponseHandler(h app.HandlerFunc) Option {
 	return option(func(cfg *Config) {
-		cfg.enableTraceIDResponseHeader = enable
-	})
-}
-
-// WithTraceIDResponseHeader configures trace id response header name
-func WithTraceIDResponseHeader(name string) Option {
-	return option(func(cfg *Config) {
-		cfg.traceIDResponseHeader = name
+		cfg.customResponseHandler = h
 	})
 }
