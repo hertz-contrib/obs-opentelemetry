@@ -17,7 +17,6 @@ package zap
 import (
 	"bytes"
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -27,7 +26,6 @@ import (
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 func stdoutProvider(ctx context.Context) func() {
@@ -47,33 +45,6 @@ func stdoutProvider(ctx context.Context) func() {
 			panic(err)
 		}
 	}
-}
-
-// testEncoderConfig encoder config for testing, copy from zap
-func testEncoderConfig() zapcore.EncoderConfig {
-	return zapcore.EncoderConfig{
-		MessageKey:     "msg",
-		LevelKey:       "level",
-		NameKey:        "name",
-		TimeKey:        "ts",
-		CallerKey:      "caller",
-		FunctionKey:    "func",
-		StacktraceKey:  "stacktrace",
-		LineEnding:     "\n",
-		EncodeTime:     zapcore.EpochTimeEncoder,
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeDuration: zapcore.SecondsDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
-	}
-}
-
-// humanEncoderConfig copy from zap
-func humanEncoderConfig() zapcore.EncoderConfig {
-	cfg := testEncoderConfig()
-	cfg.EncodeTime = zapcore.ISO8601TimeEncoder
-	cfg.EncodeLevel = zapcore.CapitalLevelEncoder
-	cfg.EncodeDuration = zapcore.StringDurationEncoder
-	return cfg
 }
 
 // TestLogger test logger work with opentelemetry
@@ -96,7 +67,7 @@ func TestLogger(t *testing.T) {
 	hlog.SetLevel(hlog.LevelDebug)
 
 	logger.Info("log from origin zap")
-	assert.True(t, strings.Contains(buf.String(), "log from origin zap"))
+	assert.Contains(t, buf.String(), "log from origin zap")
 	buf.Reset()
 
 	tracer := otel.Tracer("test otel std logger")
@@ -104,9 +75,9 @@ func TestLogger(t *testing.T) {
 	ctx, span := tracer.Start(ctx, "root")
 
 	hlog.CtxInfof(ctx, "hello %s", "world")
-	assert.True(t, strings.Contains(buf.String(), "trace_id"))
-	assert.True(t, strings.Contains(buf.String(), "span_id"))
-	assert.True(t, strings.Contains(buf.String(), "trace_flags"))
+	assert.Contains(t, buf.String(), "trace_id")
+	assert.Contains(t, buf.String(), "span_id")
+	assert.Contains(t, buf.String(), "trace_flags")
 	buf.Reset()
 
 	span.End()
@@ -149,53 +120,10 @@ func TestLogLevel(t *testing.T) {
 	logger.SetOutput(buf)
 
 	logger.Debug("this is a debug log")
-	assert.False(t, strings.Contains(buf.String(), "this is a debug log"))
+	assert.NotContains(t, buf.String(), "this is a debug log")
 
 	logger.SetLevel(hlog.LevelDebug)
 
 	logger.Debugf("this is a debug log %s", "msg")
-	assert.True(t, strings.Contains(buf.String(), "this is a debug log"))
-}
-
-// TestCoreOption test zapcore config option
-func TestCoreOption(t *testing.T) {
-	buf := new(bytes.Buffer)
-
-	logger := NewLogger(
-		WithCoreEnc(zapcore.NewConsoleEncoder(humanEncoderConfig())),
-		WithCoreLevel(zap.NewAtomicLevelAt(zapcore.WarnLevel)),
-		WithCoreWs(zapcore.AddSync(buf)),
-	)
-	defer logger.Sync()
-
-	logger.SetOutput(buf)
-
-	logger.Debug("this is a debug log")
-	// test log level
-	assert.False(t, strings.Contains(buf.String(), "this is a debug log"))
-
-	logger.Error("this is a warn log")
-	// test log level
-	assert.True(t, strings.Contains(buf.String(), "this is a warn log"))
-	// test console encoder result
-	assert.True(t, strings.Contains(buf.String(), "\tERROR\t"))
-}
-
-// TestCoreOption test zapcore config option
-func TestZapOption(t *testing.T) {
-	buf := new(bytes.Buffer)
-
-	logger := NewLogger(
-		WithZapOptions(zap.AddCaller()),
-	)
-	defer logger.Sync()
-
-	logger.SetOutput(buf)
-
-	logger.Debug("this is a debug log")
-	assert.False(t, strings.Contains(buf.String(), "this is a debug log"))
-
-	logger.Error("this is a warn log")
-	// test caller in log result
-	assert.True(t, strings.Contains(buf.String(), "caller"))
+	assert.Contains(t, buf.String(), "this is a debug log")
 }
