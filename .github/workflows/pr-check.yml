@@ -1,10 +1,10 @@
 name: Pull Request Check
 
-on: [ pull_request ]
+on: [pull_request]
 
 jobs:
   compliant:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -14,7 +14,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   staticcheck:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
