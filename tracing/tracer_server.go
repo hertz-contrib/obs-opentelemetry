@@ -28,7 +28,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/tracer"
 	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
 	"github.com/hertz-contrib/obs-opentelemetry/tracing/internal"
-	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 	oteltrace "go.opentelemetry.io/otel/trace"
 )
@@ -37,6 +36,7 @@ var _ tracer.Tracer = (*serverTracer)(nil)
 
 type serverTracer struct {
 	config            *Config
+	counters          map[string]metric.Int64Counter
 	histogramRecorder map[string]metric.Float64Histogram
 }
 
@@ -44,6 +44,7 @@ func NewServerTracer(opts ...Option) (serverconfig.Option, *Config) {
 	cfg := newConfig(opts)
 	st := &serverTracer{
 		config:            cfg,
+		counters:          make(map[string]metric.Int64Counter),
 		histogramRecorder: make(map[string]metric.Float64Histogram),
 	}
 
@@ -53,9 +54,21 @@ func NewServerTracer(opts ...Option) (serverconfig.Option, *Config) {
 }
 
 func (s *serverTracer) createMeasures() {
-	serverLatencyMeasure, err := s.config.meter.Float64Histogram(ServerLatency)
+	serverRequestCountMeasure, err := s.config.meter.Int64Counter(
+		ServerRequestCount,
+		metric.WithUnit("count"),
+		metric.WithDescription("measures Incoming request count total"),
+	)
 	handleErr(err)
 
+	serverLatencyMeasure, err := s.config.meter.Float64Histogram(
+		ServerLatency,
+		metric.WithUnit("ms"),
+		metric.WithDescription("measures th incoming end to end duration"),
+	)
+	handleErr(err)
+
+	s.counters[ServerRequestCount] = serverRequestCountMeasure
 	s.histogramRecorder[ServerLatency] = serverLatencyMeasure
 }
 
@@ -86,10 +99,7 @@ func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	httpFinish := st.GetEvent(stats.HTTPFinish)
-
-	duration := httpFinish.Time().Sub(httpStart.Time())
-	elapsedTime := float64(duration) / float64(time.Millisecond)
+	elapsedTime := float64(st.GetEvent(stats.HTTPFinish).Time().Sub(httpStart.Time())) / float64(time.Millisecond)
 
 	// span
 	span := tc.Span()
@@ -101,22 +111,9 @@ func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
 	if httpReq, err := adaptor.GetCompatRequest(c.GetRequest()); err == nil {
 		span.SetAttributes(semconv.NetAttributesFromHTTPRequest("tcp", httpReq)...)
 		span.SetAttributes(semconv.EndUserAttributesFromHTTPRequest(httpReq)...)
-		span.SetAttributes(semconv.HTTPServerAttributesFromHTTPRequest("", c.FullPath(), httpReq)...)
+		span.SetAttributes(semconv.HTTPServerAttributesFromHTTPRequest("", s.config.serverHttpRouteFormatter(c), httpReq)...)
+		span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(c.Response.StatusCode()))
 	}
-
-	// span attributes
-	attrs := []attribute.KeyValue{
-		semconv.HTTPHostKey.String(string(c.Host())),
-		semconv.HTTPRouteKey.String(c.FullPath()),
-		semconv.HTTPMethodKey.String(string(c.Method())),
-		semconv.HTTPURLKey.String(c.URI().String()),
-		semconv.NetPeerIPKey.String(c.ClientIP()),
-		semconv.HTTPClientIPKey.String(c.ClientIP()),
-		semconv.HTTPTargetKey.String(string(c.URI().PathOriginal())),
-		semconv.HTTPStatusCodeKey.Int(c.Response.StatusCode()),
-	}
-
-	span.SetAttributes(attrs...)
 
 	injectStatsEventsToSpan(span, st)
 
@@ -127,5 +124,6 @@ func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
 	span.End(oteltrace.WithTimestamp(getEndTimeOrNow(ti)))
 
 	metricsAttributes := extractMetricsAttributesFromSpan(span)
+	s.counters[ServerRequestCount].Add(ctx, 1, metric.WithAttributes(metricsAttributes...))
 	s.histogramRecorder[ServerLatency].Record(ctx, elapsedTime, metric.WithAttributes(metricsAttributes...))
 }
