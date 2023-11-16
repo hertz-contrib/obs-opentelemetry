@@ -77,6 +77,10 @@ func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
 	ti := c.GetTraceInfo()
 	st := ti.Stats()
 
+	if st.Level() == stats.LevelDisabled {
+		return
+	}
+
 	httpStart := st.GetEvent(stats.HTTPStart)
 	if httpStart == nil {
 		return
