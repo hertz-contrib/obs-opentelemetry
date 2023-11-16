@@ -18,6 +18,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
 	"go.opentelemetry.io/otel/metric"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -109,8 +110,11 @@ func ServerMiddleware(cfg *Config) app.HandlerFunc {
 		}
 
 		sTracer := tc.Tracer()
-
 		ti := c.GetTraceInfo()
+		if ti.Stats().Level() == stats.LevelDisabled {
+			c.Next(ctx)
+			return
+		}
 
 		opts := []oteltrace.SpanStartOption{
 			oteltrace.WithTimestamp(getStartTimeOrNow(ti)),

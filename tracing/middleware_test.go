@@ -20,10 +20,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cloudwego/hertz/pkg/common/test/assert"
-
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/common/test/assert"
+	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
 	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
@@ -46,4 +46,25 @@ func TestServerMiddleware(t *testing.T) {
 	resp, err := http.Get("http://127.0.0.1:6666/ping")
 	assert.Nil(t, err)
 	assert.True(t, len(resp.Header.Get("trace-id")) != 0)
+}
+
+func TestServerMiddlewareDisableTrace(t *testing.T) {
+	sr := tracetest.NewSpanRecorder()
+	otel.SetTracerProvider(sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(sr)))
+	tracer, cfg := NewServerTracer(WithCustomResponseHandler(func(c context.Context, ctx *app.RequestContext) {
+		ctx.Header("trace-id", oteltrace.SpanFromContext(c).SpanContext().TraceID().String())
+	}))
+	h := server.Default(tracer,
+		server.WithHostPorts("127.0.0.1:16666"),
+		server.WithTraceLevel(stats.LevelDisabled),
+	)
+	h.Use(ServerMiddleware(cfg))
+	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
+	})
+
+	go h.Spin()
+	time.Sleep(100 * time.Millisecond)
+	resp, err := http.Get("http://127.0.0.1:16666/ping")
+	assert.Nil(t, err)
+	assert.True(t, len(resp.Header.Get("trace-id")) == 0)
 }
