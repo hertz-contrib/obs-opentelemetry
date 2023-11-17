@@ -140,17 +140,19 @@ h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 
 下表列出了 HTTP 服务的指标
 
-| 名称                          | Instrument Type | 单位        | 单位  | 描述                                                                  |
-|-------------------------------|---------------------------------------------------|--------------|-------------------------------------------|------------------------------------------------------------------------------|
-| `http.server.duration`        | Histogram                                         | milliseconds | `ms`                                      | 测量入站 HTTP 请求的耗时 |
+| 名称                          | Instrument Type | 单位        | 单位  | 描述              |
+|-----------------------------|---------------------------------------------------|--------------|-------------------------------------------|-----------------|
+| `http.server.duration`      | Histogram                                         | milliseconds | `ms`                                      | 测量入站 HTTP 请求的耗时 |
+| `http.server.request_count` | Counter         | count        | `count`   | 测量入站 HTTP 请求数   |
 
 #### Hertz Client
 
 下表列出了 HTTP 客户端指标
 
-| 名称                        | Instrument Type | 单位         | 单位 （UCUM） | 描述                                              |
-|-----------------------------|---------------------------------------------------|--------------|-------------------------------------------|----------------------------------------------------------|
-| `http.client.duration`      | Histogram                                         | milliseconds | `ms`                                      | 测量出站 HTTP 请求的耗时            |
+| 名称                        | Instrument Type | 单位         | 单位 （UCUM） | 描述              |
+|-----------------------------|---------------------------------------------------|--------------|-------------------------------------------|-----------------|
+| `http.client.duration`      | Histogram                                         | milliseconds | `ms`                                      | 测量出站 HTTP 请求的耗时 |
+| `http.client.request_count`      | Counter                                         | count | `count`                                      | 测量出站 HTTP 请求数   |
 
 
 ### R.E.D
@@ -163,7 +165,7 @@ R.E.D (Rate, Errors, Duration) 定义了架构中的每个微服务测量的三�
 例如: QPS（Queries Per Second）每秒查询率
 
 ```
-sum(rate(http_server_duration_count{}[5m])) by (service_name, http_method)
+sum(rate(http_server_request_count_total{}[5m])) by (service_name, http_method)
 ```
 
 #### Errors
@@ -173,7 +175,7 @@ sum(rate(http_server_duration_count{}[5m])) by (service_name, http_method)
 例如：错误率
 
 ```
-sum(rate(http_server_duration_count{status_code="Error"}[5m])) by (service_name, http_method) / sum(rate(http_server_duration_count{}[5m])) by (service_name, http_method)
+sum(rate(http_server_request_count_total{status_code="Error"}[5m])) by (service_name, http_method) / sum(rate(http_server_request_count_total{}[5m])) by (service_name, http_method)
 ```
 
 #### Duration
@@ -190,7 +192,7 @@ histogram_quantile(0.99, sum(rate(http_server_duration_bucket{}[5m])) by (le, se
 
  `http.server.duration`将记录对等服务和当前服务维度。基于这个维度，我们可以汇总生成服务拓扑图
 ```
-sum(rate(http_server_duration_count{}[5m])) by (service_name, peer_service)
+sum(rate(http_server_request_count_total{}[5m])) by (service_name, peer_service)
 ```
 
 ### Runtime Metrics

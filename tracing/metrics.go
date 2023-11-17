@@ -21,22 +21,16 @@ import (
 	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
-// Server HTTP metrics. ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md#http-server
+// Server HTTP metrics
 const (
-	RequestCount          = "http.server.request_count"           // Incoming request count total
-	RequestContentLength  = "http.server.request_content_length"  // Incoming request bytes total
-	ResponseContentLength = "http.server.response_content_length" // Incoming response bytes total
-	ServerLatency         = "http.server.duration"                // Incoming end to end duration, microseconds
+	ServerRequestCount = "http.server.request_count" // measures the incoming request count total
+	ServerLatency      = "http.server.duration"      // measures th incoming end to end duration
 )
 
-// Client HTTP metrics. ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md#http-client
-// http.client.duration	Histogram	milliseconds	ms	measures the duration outbound HTTP requests
-// http.client.request.size	Histogram	bytes	By	measures the size of HTTP request messages (compressed)
-// http.client.response.size	Histogram	bytes	By	measures the size of HTTP response messages (compressed)
+// Client HTTP metrics.
 const (
-	ClientLatency      = "http.client.duration"
-	ClientRequestSize  = "http.client.request.size"
-	ClientResponseSize = "http.client.response.size"
+	ClientRequestCount = "http.client.request_count" // measures the client request count total
+	ClientLatency      = "http.client.duration"      // measures the duration outbound HTTP requests
 )
 
 var (

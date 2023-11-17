@@ -133,9 +133,10 @@ h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 
 Below is a table of HTTP server metric instruments.
 
-| Name                          | Instrument Type | Unit        | Unit  | Description                                                                  |
-|-------------------------------|---------------------------------------------------|--------------|-------------------------------------------|------------------------------------------------------------------------------|
-| `http.server.duration`        | Histogram                                         | milliseconds | `ms`                                      | measures the duration inbound HTTP requests |
+| Name                        | Instrument Type | Unit         | Unit      | Description                                                                  |
+|-----------------------------|-----------------|--------------|-----------|------------------------------------------------------------------------------|
+| `http.server.duration`      | Histogram       | milliseconds | `ms`<br/> | measures the duration inbound HTTP requests |
+| `http.server.request_count` | Counter         | count        | `count`   | measures the incoming request count total |
 
 
 #### Hertz Client
@@ -145,6 +146,7 @@ Below is a table of HTTP client metric instruments.
 | Name                        | Instrument Type ([*](README.md#instrument-types)) | Unit         | Unit ([UCUM](README.md#instrument-units)) | Description                                              |
 |-----------------------------|---------------------------------------------------|--------------|-------------------------------------------|----------------------------------------------------------|
 | `http.client.duration`      | Histogram                                         | milliseconds | `ms`                                      | measures the duration outbound HTTP requests             |
+| `http.client.request_count`      | Counter                                         | count | `count`                                      | measures the client request count total            |
 
 
 ### R.E.D
@@ -155,7 +157,7 @@ the number of requests, per second, you services are serving.
 
 eg: QPS
 ```
-sum(rate(http_server_duration_count{}[5m])) by (service_name, http_method)
+sum(rate(http_server_request_count_total{}[5m])) by (service_name, http_method)
 ```
 
 #### Errors
@@ -163,7 +165,7 @@ the number of failed requests per second.
 
 eg: Error ratio
 ```
-sum(rate(http_server_duration_count{status_code="Error"}[5m])) by (service_name, http_method) / sum(rate(http_server_duration_count{}[5m])) by (service_name, http_method)
+sum(rate(http_server_request_count_total{status_code="Error"}[5m])) by (service_name, http_method) / sum(rate(http_server_request_count_total{}[5m])) by (service_name, http_method)
 ```
 
 #### Duration
@@ -177,7 +179,7 @@ histogram_quantile(0.99, sum(rate(http_server_duration_bucket{}[5m])) by (le, se
 ### Service Topology Map
 The `http.server.duration` will record the peer service and the current service dimension. Based on this dimension, we can aggregate the service topology map
 ```
-sum(rate(http_server_duration_count{}[5m])) by (service_name, peer_service)
+sum(rate(http_server_request_count_total{}[5m])) by (service_name, peer_service)
 ```
 
 ### Runtime Metrics

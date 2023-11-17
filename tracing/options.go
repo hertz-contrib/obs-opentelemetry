@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/protocol"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
@@ -42,6 +43,9 @@ func (fn option) apply(cfg *Config) {
 type Config struct {
 	tracer trace.Tracer
 	meter  metric.Meter
+
+	clientHttpRouteFormatter func(req *protocol.Request) string
+	serverHttpRouteFormatter func(c *app.RequestContext) string
 
 	tracerProvider    trace.TracerProvider
 	meterProvider     metric.MeterProvider
@@ -78,6 +82,19 @@ func defaultConfig() *Config {
 		meterProvider:         otel.GetMeterProvider(),
 		textMapPropagator:     otel.GetTextMapPropagator(),
 		customResponseHandler: func(c context.Context, ctx *app.RequestContext) {},
+		clientHttpRouteFormatter: func(req *protocol.Request) string {
+			return string(req.Path())
+		},
+		serverHttpRouteFormatter: func(c *app.RequestContext) string {
+			// FullPath returns a matched route full path. For not found routes
+			// returns an empty string.
+			route := c.FullPath()
+			// fall back to path
+			if route == "" {
+				route = string(c.Path())
+			}
+			return route
+		},
 	}
 }
 
@@ -99,5 +116,19 @@ func WithTextMapPropagator(p propagation.TextMapPropagator) Option {
 func WithCustomResponseHandler(h app.HandlerFunc) Option {
 	return option(func(cfg *Config) {
 		cfg.customResponseHandler = h
+	})
+}
+
+// WithClientHttpRouteFormatter configures clientHttpRouteFormatter
+func WithClientHttpRouteFormatter(clientHttpRouteFormatter func(req *protocol.Request) string) Option {
+	return option(func(cfg *Config) {
+		cfg.clientHttpRouteFormatter = clientHttpRouteFormatter
+	})
+}
+
+// WithServerHttpRouteFormatter configures serverHttpRouteFormatter
+func WithServerHttpRouteFormatter(serverHttpRouteFormatter func(c *app.RequestContext) string) Option {
+	return option(func(cfg *Config) {
+		cfg.serverHttpRouteFormatter = serverHttpRouteFormatter
 	})
 }
