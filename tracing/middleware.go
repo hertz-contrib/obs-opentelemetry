@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
+	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/client"
@@ -99,6 +100,13 @@ func ClientMiddleware(opts ...Option) client.Middleware {
 				span.SetAttributes(semconv.EndUserAttributesFromHTTPRequest(httpReq)...)
 				span.SetAttributes(semconv.HTTPServerAttributesFromHTTPRequest("", cfg.clientHttpRouteFormatter(req), httpReq)...)
 			}
+
+			// span attributes
+			attrs := []attribute.KeyValue{
+				semconv.HTTPURLKey.String(req.URI().String()),
+				semconv.HTTPStatusCodeKey.Int(resp.StatusCode()),
+			}
+			span.SetAttributes(attrs...)
 
 			// set span status with resp status code
 			span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(resp.StatusCode()))
