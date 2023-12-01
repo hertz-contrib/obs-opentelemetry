@@ -18,6 +18,7 @@ import (
 	"context"
 	"time"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -114,6 +115,14 @@ func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
 		span.SetAttributes(semconv.HTTPServerAttributesFromHTTPRequest("", s.config.serverHttpRouteFormatter(c), httpReq)...)
 		span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(c.Response.StatusCode()))
 	}
+
+	// span attributes
+	attrs := []attribute.KeyValue{
+		semconv.HTTPURLKey.String(c.URI().String()),
+		semconv.NetPeerIPKey.String(c.ClientIP()),
+		semconv.HTTPStatusCodeKey.Int(c.Response.StatusCode()),
+	}
+	span.SetAttributes(attrs...)
 
 	injectStatsEventsToSpan(span, st)
 
