@@ -129,6 +129,10 @@ func ClientMiddleware(opts ...Option) client.Middleware {
 
 func ServerMiddleware(cfg *Config) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
+		if cfg.shouldIgnore(ctx, c) {
+			c.Next(ctx)
+			return
+		}
 		// get tracer carrier
 		tc := internal.TraceCarrierFromContext(ctx)
 		if tc == nil {
