@@ -73,7 +73,10 @@ func (s *serverTracer) createMeasures() {
 	s.histogramRecorder[ServerLatency] = serverLatencyMeasure
 }
 
-func (s *serverTracer) Start(ctx context.Context, _ *app.RequestContext) context.Context {
+func (s *serverTracer) Start(ctx context.Context, c *app.RequestContext) context.Context {
+	if s.config.shouldIgnore(ctx, c) {
+		return ctx
+	}
 	tc := &internal.TraceCarrier{}
 	tc.SetTracer(s.config.tracer)
 
@@ -81,6 +84,9 @@ func (s *serverTracer) Start(ctx context.Context, _ *app.RequestContext) context
 }
 
 func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
+	if s.config.shouldIgnore(ctx, c) {
+		return
+	}
 	// trace carrier from context
 	tc := internal.TraceCarrierFromContext(ctx)
 	if tc == nil {

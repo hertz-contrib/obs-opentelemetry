@@ -40,6 +40,8 @@ func (fn option) apply(cfg *Config) {
 	fn(cfg)
 }
 
+type ConditionFunc func(ctx context.Context, c *app.RequestContext) bool
+
 type Config struct {
 	tracer trace.Tracer
 	meter  metric.Meter
@@ -54,6 +56,7 @@ type Config struct {
 	recordSourceOperation bool
 
 	customResponseHandler app.HandlerFunc
+	shouldIgnore          ConditionFunc
 }
 
 func newConfig(opts []Option) *Config {
@@ -95,6 +98,9 @@ func defaultConfig() *Config {
 			}
 			return route
 		},
+		shouldIgnore: func(ctx context.Context, c *app.RequestContext) bool {
+			return false
+		},
 	}
 }
 
@@ -130,5 +136,12 @@ func WithClientHttpRouteFormatter(clientHttpRouteFormatter func(req *protocol.Re
 func WithServerHttpRouteFormatter(serverHttpRouteFormatter func(c *app.RequestContext) string) Option {
 	return option(func(cfg *Config) {
 		cfg.serverHttpRouteFormatter = serverHttpRouteFormatter
+	})
+}
+
+// WithShouldIgnore allows you to define the condition for enabling distributed tracing
+func WithShouldIgnore(condition ConditionFunc) Option {
+	return option(func(cfg *Config) {
+		cfg.shouldIgnore = condition
 	})
 }
