@@ -138,3 +138,7 @@ func (l *Logger) CtxErrorf(ctx context.Context, format string, v ...interface{})
 func (l *Logger) CtxFatalf(ctx context.Context, format string, v ...interface{}) {
 	l.CtxLogf(hlog.LevelFatal, ctx, format, v...)
 }
+
+func Test() {
+
+}
