@@ -20,7 +20,6 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	hertzzap "github.com/hertz-contrib/logger/zap"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
@@ -37,14 +36,9 @@ const (
 	traceIDKey    = "trace_id"
 	spanIDKey     = "span_id"
 	traceFlagsKey = "trace_flags"
-	logEventKey   = "log"
 )
 
-var (
-	logSeverityTextKey = attribute.Key("otel.log.severity.text")
-	logMessageKey      = attribute.Key("otel.log.message")
-	extraKeys          = []hertzzap.ExtraKey{traceIDKey, spanIDKey, traceFlagsKey}
-)
+var extraKeys = []hertzzap.ExtraKey{traceIDKey, spanIDKey, traceFlagsKey}
 
 func NewLogger(opts ...Option) *Logger {
 	config := defaultConfig()
@@ -96,17 +90,10 @@ func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, k
 		return
 	}
 
-	msg := getMessage(format, kvs)
-
-	attrs := []attribute.KeyValue{
-		logMessageKey.String(msg),
-		logSeverityTextKey.String(OtelSeverityText(zlevel)),
-	}
-	span.AddEvent(logEventKey, trace.WithAttributes(attrs...))
-
 	// set span status
 	if zlevel >= l.config.traceConfig.errorSpanLevel {
-		span.SetStatus(codes.Error, msg)
+		msg := getMessage(format, kvs)
+		span.SetStatus(codes.Error, "")
 		span.RecordError(errors.New(msg), trace.WithStackTrace(l.config.traceConfig.recordStackTraceInSpan))
 	}
 }
