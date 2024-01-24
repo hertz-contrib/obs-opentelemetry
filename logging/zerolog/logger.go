@@ -52,6 +52,8 @@ func NewLogger(opts ...Option) *Logger {
 	logger.Unwrap().Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
 		ctx := e.GetCtx()
 		e.Any(traceIDKey, ctx.Value(ExtraKey(traceIDKey)))
+		e.Any(spanIDKey, ctx.Value(ExtraKey(spanIDKey)))
+		e.Any(traceFlagsKey, ctx.Value(ExtraKey(traceFlagsKey)))
 	}))
 
 	return &Logger{
