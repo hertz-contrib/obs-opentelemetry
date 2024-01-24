@@ -51,7 +51,7 @@ func NewLogger(opts ...Option) *Logger {
 	logger := *config.logger
 	logger.Unwrap().Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
 		ctx := e.GetCtx()
-		e.Any(traceIDKey, ctx.Value(string(traceIDKey)))
+		e.Any(traceIDKey, ctx.Value(ExtraKey(traceIDKey)))
 	}))
 
 	return &Logger{
@@ -100,4 +100,33 @@ func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, k
 		span.SetStatus(codes.Error, "")
 		span.RecordError(errors.New(msg), trace.WithStackTrace(l.config.traceConfig.recordStackTraceInSpan))
 	}
+}
+
+func (l *Logger) CtxTracef(ctx context.Context, format string, v ...any) {
+	l.CtxLogf(hlog.LevelDebug, ctx, format, v...)
+}
+
+func (l *Logger) CtxDebugf(ctx context.Context, format string, v ...any) {
+	l.CtxLogf(hlog.LevelDebug, ctx, format, v...)
+}
+
+func (l *Logger) CtxInfof(ctx context.Context, format string, v ...any) {
+	l.CtxLogf(hlog.LevelInfo, ctx, format, v...)
+}
+
+func (l *Logger) CtxNoticef(ctx context.Context, format string, v ...any) {
+	l.CtxLogf(hlog.LevelWarn, ctx, format, v...)
+}
+
+func (l *Logger) CtxWarnf(ctx context.Context, format string, v ...any) {
+	l.CtxLogf(hlog.LevelWarn, ctx, format, v...)
+}
+
+func (l *Logger) CtxErrorf(ctx context.Context, format string, v ...any) {
+	l.CtxLogf(hlog.LevelError, ctx, format, v...)
+}
+
+func (l *Logger) CtxFatalf(ctx context.Context, format string, v ...any) {
+	// l.CtxLogf(hlog.LevelFatal, ctx, format, v...)
+	l.Logger.CtxFatalf(ctx, format, v...)
 }

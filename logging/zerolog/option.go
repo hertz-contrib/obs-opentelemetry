@@ -55,7 +55,7 @@ func WithLogger(logger *hertzzerolog.Logger) Option {
 	return option(func(cfg *config) {
 		logger.Unwrap().Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
 			ctx := e.GetCtx()
-			e.Any(traceIDKey, ctx.Value(string(traceIDKey)))
+			e.Any(traceIDKey, ctx.Value(ExtraKey(traceIDKey)))
 		}))
 		cfg.logger = logger
 	})
