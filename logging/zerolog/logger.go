@@ -32,14 +32,12 @@ type Logger struct {
 
 // Ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/README.md#json-formats
 const (
-	traceIDKey    = "trace_id"
-	spanIDKey     = "span_id"
-	traceFlagsKey = "trace_flags"
+	TraceIDKey    = "trace_id"
+	SpanIDKey     = "span_id"
+	TraceFlagsKey = "trace_flags"
 )
 
 type ExtraKey string
-
-var extraKeys = []ExtraKey{traceIDKey, spanIDKey, traceFlagsKey}
 
 func NewLogger(opts ...Option) *Logger {
 	config := defaultConfig()
@@ -49,15 +47,15 @@ func NewLogger(opts ...Option) *Logger {
 		opt.apply(config)
 	}
 	logger := *config.logger
-	logger.Unwrap().Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
+	newLogger := hertzzerolog.From(logger.Unwrap().Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
 		ctx := e.GetCtx()
-		e.Any(traceIDKey, ctx.Value(ExtraKey(traceIDKey)))
-		e.Any(spanIDKey, ctx.Value(ExtraKey(spanIDKey)))
-		e.Any(traceFlagsKey, ctx.Value(ExtraKey(traceFlagsKey)))
-	}))
+		e.Any(TraceIDKey, ctx.Value(ExtraKey(TraceIDKey)))
+		e.Any(SpanIDKey, ctx.Value(ExtraKey(SpanIDKey)))
+		e.Any(TraceFlagsKey, ctx.Value(ExtraKey(TraceFlagsKey)))
+	})))
 
 	return &Logger{
-		Logger: logger,
+		Logger: *newLogger,
 		config: config,
 	}
 }
@@ -66,9 +64,9 @@ func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, k
 	var zlevel zerolog.Level
 	span := trace.SpanFromContext(ctx)
 
-	ctx = context.WithValue(ctx, ExtraKey(traceIDKey), span.SpanContext().TraceID())
-	ctx = context.WithValue(ctx, ExtraKey(spanIDKey), span.SpanContext().SpanID())
-	ctx = context.WithValue(ctx, ExtraKey(traceFlagsKey), span.SpanContext().TraceFlags())
+	ctx = context.WithValue(ctx, ExtraKey(TraceIDKey), span.SpanContext().TraceID())
+	ctx = context.WithValue(ctx, ExtraKey(SpanIDKey), span.SpanContext().SpanID())
+	ctx = context.WithValue(ctx, ExtraKey(TraceFlagsKey), span.SpanContext().TraceFlags())
 
 	switch level {
 	case hlog.LevelDebug, hlog.LevelTrace:
