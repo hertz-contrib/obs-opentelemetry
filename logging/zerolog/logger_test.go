@@ -119,6 +119,8 @@ func TestLogLevel(t *testing.T) {
 		WithRecordStackTraceInSpan(true),
 	)
 
+	logger.SetLevel(hlog.LevelError)
+
 	// output to buffer
 	logger.SetOutput(buf)
 
@@ -127,6 +129,6 @@ func TestLogLevel(t *testing.T) {
 
 	logger.SetLevel(hlog.LevelDebug)
 
-	logger.Debugf("this is a debug log %s", "msg")
+	logger.Debug("this is a debug log")
 	assert.Contains(t, buf.String(), "this is a debug log")
 }
