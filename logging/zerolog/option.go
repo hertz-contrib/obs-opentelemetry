@@ -85,12 +85,12 @@ func (cfg config) getZerologHookFn() zerolog.HookFunc {
 		span := trace.SpanFromContext(ctx)
 		spanCtx := span.SpanContext()
 
-		if spanCtx.HasSpanID() {
-			e.Any(SpanIDKey, spanCtx.SpanID())
+		if !spanCtx.IsValid() {
+			return
 		}
-		if spanCtx.HasTraceID() {
-			e.Any(TraceIDKey, spanCtx.TraceID())
-		}
+
+		e.Any(SpanIDKey, spanCtx.SpanID())
+		e.Any(TraceIDKey, spanCtx.TraceID())
 		e.Any(TraceFlagsKey, spanCtx.TraceFlags())
 
 		if !span.IsRecording() {
