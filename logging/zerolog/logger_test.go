@@ -1,4 +1,4 @@
-// Copyright 2022 CloudWeGo Authors.
+// Copyright 2024 CloudWeGo Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	hertzZerolog "github.com/hertz-contrib/logger/zerolog"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
@@ -56,14 +57,18 @@ func TestLogger(t *testing.T) {
 	shutdown := stdoutProvider(ctx)
 	defer shutdown()
 
+	hertzZerologer := hertzZerolog.New(
+		hertzZerolog.WithOutput(buf),
+		hertzZerolog.WithLevel(hlog.LevelDebug),
+	)
+
 	logger := NewLogger(
+		WithLogger(hertzZerologer),
 		WithTraceErrorSpanLevel(zerolog.WarnLevel),
 		WithRecordStackTraceInSpan(true),
 	)
 
 	hlog.SetLogger(logger)
-	hlog.SetOutput(buf)
-	hlog.SetLevel(hlog.LevelDebug)
 
 	logger.Info("log from origin zerolog")
 	assert.Contains(t, buf.String(), "log from origin zerolog")

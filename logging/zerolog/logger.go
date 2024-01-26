@@ -1,4 +1,4 @@
-// Copyright 2022 CloudWeGo Authors.
+// Copyright 2024 CloudWeGo Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import (
 )
 
 type Logger struct {
-	hertzzerolog.Logger
+	*hertzzerolog.Logger
 	config *config
 }
 
@@ -40,33 +40,23 @@ const (
 type ExtraKey string
 
 func NewLogger(opts ...Option) *Logger {
-	config := defaultConfig()
+	cfg := defaultConfig()
 
 	// apply options
 	for _, opt := range opts {
-		opt.apply(config)
+		opt.apply(cfg)
 	}
-	logger := *config.logger
-	newLogger := hertzzerolog.From(logger.Unwrap().Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
-		ctx := e.GetCtx()
-		e.Any(TraceIDKey, ctx.Value(ExtraKey(TraceIDKey)))
-		e.Any(SpanIDKey, ctx.Value(ExtraKey(SpanIDKey)))
-		e.Any(TraceFlagsKey, ctx.Value(ExtraKey(TraceFlagsKey)))
-	})))
+	logger := *cfg.logger
+	zerologLogger := logger.Unwrap().Hook(cfg.getZerologHookFn())
 
 	return &Logger{
-		Logger: *newLogger,
-		config: config,
+		Logger: hertzzerolog.From(zerologLogger),
+		config: cfg,
 	}
 }
 
 func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, kvs ...any) {
 	var zlevel zerolog.Level
-	span := trace.SpanFromContext(ctx)
-
-	ctx = context.WithValue(ctx, ExtraKey(TraceIDKey), span.SpanContext().TraceID())
-	ctx = context.WithValue(ctx, ExtraKey(SpanIDKey), span.SpanContext().SpanID())
-	ctx = context.WithValue(ctx, ExtraKey(TraceFlagsKey), span.SpanContext().TraceFlags())
 
 	switch level {
 	case hlog.LevelDebug, hlog.LevelTrace:
@@ -89,6 +79,7 @@ func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, k
 		l.Logger.CtxWarnf(ctx, format, kvs...)
 	}
 
+	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		l.Logger.Logf(level, format, kvs...)
 		return

@@ -1,27 +1,54 @@
-# Notes
-- If you're using the global logger in `github.com/rs/zerolog/log.Logger` to do log. You should add the middleware to pass the OTEL extra information (key, value) into the `context.Context`.
-- Example:
+# Zerolog + OpenTelemetry + Hezrt
+
+## [Document](https://www.cloudwego.io/docs/hertz/tutorials/observability/open-telemetry/)
+
+## Example
+
+1. See this [example](https://github.com/cloudwego/hertz-examples/tree/main/opentelemetry)
+2. Small change in herzt server
+
 ```go
 import (
-    "context"
-	"time"
+	// ...
 
-	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
+	hertzZerolog "github.com/hertz-contrib/logger/zerolog"
+	hertzOtelZerolog "github.com/hertz-contrib/obs-opentelemetry/logging/zerolog"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"go.opentelemetry.io/otel/trace"
-	"github.com/hertz-contrib/obs-opentelemetry/logging/zerolog"
 )
 
-func OtelZerologMiddleware() app.HandlerFunc {
-	return func(ctx context.Context, reqCtx *app.RequestContext) {
-		ctx = log.Logger.WithContext(ctx)
+func main() {
+	// ...
+	
+	p := provider.NewOpenTelemetryProvider(
+		provider.WithServiceName(serviceName),
+		// Support setting ExportEndpoint via environment variables: OTEL_EXPORTER_OTLP_ENDPOINT
+		provider.WithExportEndpoint("localhost:4317"),
+		provider.WithInsecure(),
+	)
+	defer p.Shutdown(context.Background())
 
-		span := trace.SpanFromContext(ctx)
+	tracer, cfg := hertztracing.NewServerTracer()
+	h := server.Default(tracer)
+	h.Use(hertztracing.ServerMiddleware(cfg))
 
-		ctx = context.WithValue(ctx, zerolog.ExtraKey(zerolog.TraceIDKey), span.SpanContext().TraceID())
-		ctx = context.WithValue(ctx, zerolog.ExtraKey(zerolog.SpanIDKey), span.SpanContext().SpanID())
-		ctx = context.WithValue(ctx, zerolog.ExtraKey(zerolog.TraceFlagsKey), span.SpanContext().TraceFlags())
+	logger := hertzZerolog.New(
+		hertzZerolog.WithOutput(w),             // allows to specify output
+		hertzZerolog.WithLevel(hlog.LevelInfo), // option with log level
+		hertzZerolog.WithCaller(),              // option with caller
+		hertzZerolog.WithTimestamp(),           // option with timestamp
+		hertzZerolog.WithFormattedTimestamp(time.RFC3339),
+	)
 
-		reqCtx.Next(ctx)
-	}
+	log.Logger = logger.Unwrap() // log.Output(w).With().Caller().Logger()
+	log.Logger = log.Level(zerolog.InfoLevel)
+
+	otelLogger := hertzOtelZerolog.NewLogger(hertzOtelZerolog.WithLogger(logger))
+	log.Logger = otelLogger.Unwrap()
+	hlog.SetLogger(otelLogger)
+
+	// ...
+}
 ```
+

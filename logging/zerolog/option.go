@@ -1,4 +1,4 @@
-// Copyright 2022 CloudWeGo Authors.
+// Copyright 2024 CloudWeGo Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,12 @@
 package zerolog
 
 import (
+	"errors"
+
 	hertzzerolog "github.com/hertz-contrib/logger/zerolog"
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Option interface {
@@ -37,6 +41,7 @@ type traceConfig struct {
 type config struct {
 	logger      *hertzzerolog.Logger
 	traceConfig *traceConfig
+	hookFunc    zerolog.HookFunc
 }
 
 // defaultConfig default config
@@ -69,4 +74,34 @@ func WithRecordStackTraceInSpan(recordStackTraceInSpan bool) Option {
 	return option(func(cfg *config) {
 		cfg.traceConfig.recordStackTraceInSpan = recordStackTraceInSpan
 	})
+}
+
+func (cfg config) getZerologHookFn() zerolog.HookFunc {
+	if cfg.hookFunc != nil {
+		return cfg.hookFunc
+	}
+	return func(e *zerolog.Event, level zerolog.Level, message string) {
+		ctx := e.GetCtx()
+		span := trace.SpanFromContext(ctx)
+		spanCtx := span.SpanContext()
+
+		if spanCtx.HasSpanID() {
+			e.Any(SpanIDKey, spanCtx.SpanID())
+		}
+		if spanCtx.HasTraceID() {
+			e.Any(TraceIDKey, spanCtx.TraceID())
+		}
+		e.Any(TraceFlagsKey, spanCtx.TraceFlags())
+
+		if !span.IsRecording() {
+			return
+		}
+
+		// set span status
+		if level >= cfg.traceConfig.errorSpanLevel {
+			span.SetStatus(codes.Error, "")
+			span.RecordError(errors.New(message),
+				trace.WithStackTrace(cfg.traceConfig.recordStackTraceInSpan))
+		}
+	}
 }
