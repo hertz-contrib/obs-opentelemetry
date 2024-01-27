@@ -50,10 +50,6 @@ func NewLogger(opts ...Option) *Logger {
 	zerologLogger := logger.Unwrap().
 		Hook(cfg.defaultZerologHookFn())
 
-	for i := range cfg.hooks {
-		zerologLogger.Hook(cfg.hooks[i])
-	}
-
 	return &Logger{
 		Logger: hertzzerolog.From(zerologLogger),
 		config: cfg,
