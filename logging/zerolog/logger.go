@@ -15,14 +15,7 @@
 package zerolog
 
 import (
-	"context"
-	"errors"
-
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 	hertzzerolog "github.com/hertz-contrib/logger/zerolog"
-	"github.com/rs/zerolog"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
 type Logger struct {
