@@ -41,7 +41,7 @@ type traceConfig struct {
 type config struct {
 	logger      *hertzzerolog.Logger
 	traceConfig *traceConfig
-	hookFunc    zerolog.HookFunc
+	hooks       []zerolog.HookFunc
 }
 
 // defaultConfig default config
@@ -79,14 +79,14 @@ func WithRecordStackTraceInSpan(recordStackTraceInSpan bool) Option {
 // WithHook configure a custom hook function option
 func WithHook(fn zerolog.HookFunc) Option {
 	return option(func(cfg *config) {
-		cfg.hookFunc = fn
+		newHooks := make([]zerolog.HookFunc, len(cfg.hooks), len(cfg.hooks)+1)
+		copy(newHooks, cfg.hooks)
+		cfg.hooks = append(newHooks, fn)
+
 	})
 }
 
-func (cfg config) getZerologHookFn() zerolog.HookFunc {
-	if cfg.hookFunc != nil {
-		return cfg.hookFunc
-	}
+func (cfg config) defaultZerologHookFn() zerolog.HookFunc {
 	return func(e *zerolog.Event, level zerolog.Level, message string) {
 		ctx := e.GetCtx()
 		span := trace.SpanFromContext(ctx)
