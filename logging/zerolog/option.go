@@ -95,9 +95,9 @@ func (cfg config) defaultZerologHookFn() zerolog.HookFunc {
 			return
 		}
 
-		e.Any(SpanIDKey, spanCtx.SpanID())
-		e.Any(TraceIDKey, spanCtx.TraceID())
-		e.Any(TraceFlagsKey, spanCtx.TraceFlags())
+		e.Any(spanIDKey, spanCtx.SpanID())
+		e.Any(traceIDKey, spanCtx.TraceID())
+		e.Any(traceFlagsKey, spanCtx.TraceFlags())
 
 		if !span.IsRecording() {
 			return

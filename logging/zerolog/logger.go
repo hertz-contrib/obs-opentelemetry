@@ -32,9 +32,9 @@ type Logger struct {
 
 // Ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/README.md#json-formats
 const (
-	TraceIDKey    = "trace_id"
-	SpanIDKey     = "span_id"
-	TraceFlagsKey = "trace_flags"
+	traceIDKey    = "trace_id"
+	spanIDKey     = "span_id"
+	traceFlagsKey = "trace_flags"
 )
 
 type ExtraKey string
