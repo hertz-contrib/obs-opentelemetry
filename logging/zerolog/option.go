@@ -82,7 +82,6 @@ func WithHook(fn zerolog.HookFunc) Option {
 		newHooks := make([]zerolog.HookFunc, len(cfg.hooks), len(cfg.hooks)+1)
 		copy(newHooks, cfg.hooks)
 		cfg.hooks = append(newHooks, fn)
-
 	})
 }
 
