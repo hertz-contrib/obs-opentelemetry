@@ -76,6 +76,13 @@ func WithRecordStackTraceInSpan(recordStackTraceInSpan bool) Option {
 	})
 }
 
+// WithHook configure a custom hook function option
+func WithHook(fn zerolog.HookFunc) Option {
+	return option(func(cfg *config) {
+		cfg.hookFunc = fn
+	})
+}
+
 func (cfg config) getZerologHookFn() zerolog.HookFunc {
 	if cfg.hookFunc != nil {
 		return cfg.hookFunc
