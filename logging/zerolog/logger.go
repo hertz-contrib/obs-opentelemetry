@@ -30,8 +30,6 @@ const (
 	traceFlagsKey = "trace_flags"
 )
 
-type ExtraKey string
-
 func NewLogger(opts ...Option) *Logger {
 	cfg := defaultConfig()
 
