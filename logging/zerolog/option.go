@@ -41,7 +41,6 @@ type traceConfig struct {
 type config struct {
 	logger      *hertzzerolog.Logger
 	traceConfig *traceConfig
-	hookFunc    zerolog.HookFunc
 }
 
 // defaultConfig default config
@@ -76,10 +75,7 @@ func WithRecordStackTraceInSpan(recordStackTraceInSpan bool) Option {
 	})
 }
 
-func (cfg config) getZerologHookFn() zerolog.HookFunc {
-	if cfg.hookFunc != nil {
-		return cfg.hookFunc
-	}
+func (cfg config) defaultZerologHookFn() zerolog.HookFunc {
 	return func(e *zerolog.Event, level zerolog.Level, message string) {
 		ctx := e.GetCtx()
 		span := trace.SpanFromContext(ctx)
@@ -89,9 +85,9 @@ func (cfg config) getZerologHookFn() zerolog.HookFunc {
 			return
 		}
 
-		e.Any(SpanIDKey, spanCtx.SpanID())
-		e.Any(TraceIDKey, spanCtx.TraceID())
-		e.Any(TraceFlagsKey, spanCtx.TraceFlags())
+		e.Any(spanIDKey, spanCtx.SpanID())
+		e.Any(traceIDKey, spanCtx.TraceID())
+		e.Any(traceFlagsKey, spanCtx.TraceFlags())
 
 		if !span.IsRecording() {
 			return
