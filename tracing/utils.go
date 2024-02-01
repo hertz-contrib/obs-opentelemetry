@@ -33,7 +33,11 @@ import (
 // Ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md#name
 // naming rule: $HandlerName:$FullPath
 func serverSpanNaming(c *app.RequestContext) string {
-	return c.HandlerName() + ":" + c.FullPath()
+	handlerName := app.GetHandlerName(c.Handler())
+	if handlerName == "" {
+		handlerName = c.HandlerName()
+	}
+	return handlerName + ":" + c.FullPath()
 }
 
 func clientSpanNaming(req *protocol.Request) string {
