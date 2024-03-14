@@ -16,6 +16,7 @@ package tracing
 
 import (
 	"context"
+	"go.opentelemetry.io/otel/codes"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
@@ -104,12 +105,16 @@ func ClientMiddleware(opts ...Option) client.Middleware {
 			// span attributes
 			attrs := []attribute.KeyValue{
 				semconv.HTTPURLKey.String(req.URI().String()),
-				semconv.HTTPStatusCodeKey.Int(resp.StatusCode()),
+			}
+
+			if err == nil {
+				// set span status with resp status code
+				span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(resp.StatusCode()))
+				attrs = append(attrs, semconv.HTTPStatusCodeKey.Int(resp.StatusCode()))
+			} else { // resp.StatusCode() is not valid when client returns error
+				span.SetStatus(codes.Error, err.Error())
 			}
 			span.SetAttributes(attrs...)
-
-			// set span status with resp status code
-			span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(resp.StatusCode()))
 
 			// extract metrics attr
 			metricsAttributes := extractMetricsAttributesFromSpan(span)
