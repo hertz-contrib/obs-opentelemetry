@@ -16,19 +16,18 @@ package tracing
 
 import (
 	"context"
-	"go.opentelemetry.io/otel/codes"
 	"time"
-
-	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
-	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/client"
 	"github.com/cloudwego/hertz/pkg/common/adaptor"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
 	"github.com/cloudwego/hertz/pkg/protocol"
 	"github.com/hertz-contrib/obs-opentelemetry/tracing/internal"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
