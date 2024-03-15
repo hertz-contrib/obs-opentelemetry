@@ -59,6 +59,10 @@ func TestMetricsExample(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, body)
 
+	// test client returns error
+	_, _, err = c.Get(context.Background(), nil, "http://localhost:39887/ping?foo=bar")
+	assert.NotNil(t, err)
+
 	// diff metrics
 	assert.NoError(t, testutil.GatherAndCompare(
 		registry, "testdata/hertz_request_metrics.txt",

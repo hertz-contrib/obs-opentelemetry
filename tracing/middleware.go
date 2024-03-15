@@ -18,16 +18,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
-	"go.opentelemetry.io/otel/attribute"
-
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/client"
 	"github.com/cloudwego/hertz/pkg/common/adaptor"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
 	"github.com/cloudwego/hertz/pkg/protocol"
 	"github.com/hertz-contrib/obs-opentelemetry/tracing/internal"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
@@ -104,12 +104,16 @@ func ClientMiddleware(opts ...Option) client.Middleware {
 			// span attributes
 			attrs := []attribute.KeyValue{
 				semconv.HTTPURLKey.String(req.URI().String()),
-				semconv.HTTPStatusCodeKey.Int(resp.StatusCode()),
+			}
+
+			if err == nil {
+				// set span status with resp status code
+				span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(resp.StatusCode()))
+				attrs = append(attrs, semconv.HTTPStatusCodeKey.Int(resp.StatusCode()))
+			} else { // resp.StatusCode() is not valid when client returns error
+				span.SetStatus(codes.Error, err.Error())
 			}
 			span.SetAttributes(attrs...)
-
-			// set span status with resp status code
-			span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(resp.StatusCode()))
 
 			// extract metrics attr
 			metricsAttributes := extractMetricsAttributesFromSpan(span)
