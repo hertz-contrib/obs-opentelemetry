@@ -77,7 +77,7 @@ func ClientMiddleware(opts ...Option) client.Middleware {
 			// trace start
 			ctx, span := cfg.tracer.Start(
 				ctx,
-				clientSpanNaming(req),
+				cfg.clientSpanNameFormatter(req),
 				oteltrace.WithTimestamp(start),
 				oteltrace.WithSpanKind(oteltrace.SpanKindClient),
 			)
@@ -165,7 +165,7 @@ func ServerMiddleware(cfg *Config) app.HandlerFunc {
 		// set baggage
 		ctx = baggage.ContextWithBaggage(ctx, bags)
 
-		ctx, span := sTracer.Start(oteltrace.ContextWithRemoteSpanContext(ctx, spanCtx), serverSpanNaming(c), opts...)
+		ctx, span := sTracer.Start(oteltrace.ContextWithRemoteSpanContext(ctx, spanCtx), cfg.serverSpanNameFormatter(c), opts...)
 
 		// peer service attributes
 		span.SetAttributes(peerServiceAttributes...)
