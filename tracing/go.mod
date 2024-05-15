@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/bytedance/gopkg v0.0.0-20230728082804-614d0af6619b
-	github.com/cloudwego/hertz v0.7.1
+	github.com/cloudwego/hertz v0.9.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/contrib/propagators/b3 v1.20.0

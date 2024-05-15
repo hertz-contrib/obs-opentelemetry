@@ -74,12 +74,10 @@ func defaultConfig() *config {
 		enableMetrics: true,
 		sampler:       sdktrace.AlwaysSample(),
 		textMapPropagator: propagation.NewCompositeTextMapPropagator(
-			propagation.NewCompositeTextMapPropagator(
-				b3.New(),
-				ot.OT{},
-				propagation.Baggage{},
-				propagation.TraceContext{},
-			),
+			b3.New(),
+			ot.OT{},
+			propagation.Baggage{},
+			propagation.TraceContext{},
 		),
 	}
 }

@@ -75,12 +75,10 @@ func TestExtract(t *testing.T) {
 
 func TestInject(t *testing.T) {
 	cfg := newConfig([]Option{WithTextMapPropagator(propagation.NewCompositeTextMapPropagator(
-		propagation.NewCompositeTextMapPropagator(
-			b3.New(),
-			ot.OT{},
-			propagation.Baggage{},
-			propagation.TraceContext{},
-		),
+		b3.New(),
+		ot.OT{},
+		propagation.Baggage{},
+		propagation.TraceContext{},
 	))})
 
 	ctx := context.Background()
