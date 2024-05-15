@@ -3,7 +3,7 @@ module github.com/hertz-contrib/obs-opentelemetry/logging/zerolog
 go 1.19
 
 require (
-	github.com/cloudwego/hertz v0.8.0
+	github.com/cloudwego/hertz v0.9.0
 	github.com/hertz-contrib/logger/zerolog v0.0.0-20231211035138-acc7b4e2984b
 	github.com/rs/zerolog v1.31.0
 	github.com/stretchr/testify v1.8.4
