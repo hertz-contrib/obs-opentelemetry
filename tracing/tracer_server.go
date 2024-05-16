@@ -90,7 +90,7 @@ func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
 	// trace carrier from context
 	tc := internal.TraceCarrierFromContext(ctx)
 	if tc == nil {
-		hlog.Warnf("get tracer container failed")
+		hlog.Debugf("get tracer container failed")
 		return
 	}
 

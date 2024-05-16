@@ -19,30 +19,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
 	"github.com/cloudwego/hertz/pkg/common/tracer/traceinfo"
-	"github.com/cloudwego/hertz/pkg/protocol"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 	"go.opentelemetry.io/otel/trace"
 )
-
-// Ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md#name
-// naming rule: $HandlerName:$FullPath
-func serverSpanNaming(c *app.RequestContext) string {
-	handlerName := app.GetHandlerName(c.Handler())
-	if handlerName == "" {
-		handlerName = c.HandlerName()
-	}
-	return handlerName + ":" + c.FullPath()
-}
-
-func clientSpanNaming(req *protocol.Request) string {
-	return string(req.Path())
-}
 
 func handleErr(err error) {
 	if err != nil {
