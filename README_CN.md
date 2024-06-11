@@ -40,7 +40,7 @@
 import (
     // ...
     "github.com/hertz-contrib/obs-opentelemetry/provider"
-    "github.com/hertz-contrib/obs-opentelemetry/tracing"
+    hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
 )
 
 
@@ -71,7 +71,7 @@ func main()  {
 import (
     // ...
     "github.com/hertz-contrib/obs-opentelemetry/provider"
-    "github.com/hertz-contrib/obs-opentelemetry/tracing"
+    hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
 )
 
 func main(){
