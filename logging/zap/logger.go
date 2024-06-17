@@ -60,34 +60,33 @@ func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, k
 	var zlevel zapcore.Level
 	span := trace.SpanFromContext(ctx)
 
-	ctx = context.WithValue(ctx, hertzzap.ExtraKey(traceIDKey), span.SpanContext().TraceID())
-	ctx = context.WithValue(ctx, hertzzap.ExtraKey(spanIDKey), span.SpanContext().SpanID())
-	ctx = context.WithValue(ctx, hertzzap.ExtraKey(traceFlagsKey), span.SpanContext().TraceFlags())
+	if span.SpanContext().IsValid() {
+		ctx = context.WithValue(ctx, hertzzap.ExtraKey(traceIDKey), span.SpanContext().TraceID())
+		ctx = context.WithValue(ctx, hertzzap.ExtraKey(spanIDKey), span.SpanContext().SpanID())
+		ctx = context.WithValue(ctx, hertzzap.ExtraKey(traceFlagsKey), span.SpanContext().TraceFlags())
+
+		l.Logger.CtxLogf(level, ctx, format, kvs...)
+	} else {
+		l.Logger.Logf(level, format, kvs...)
+	}
+
+	if !span.IsRecording() {
+		return
+	}
 
 	switch level {
 	case hlog.LevelDebug, hlog.LevelTrace:
 		zlevel = zap.DebugLevel
-		l.Logger.CtxDebugf(ctx, format, kvs...)
 	case hlog.LevelInfo:
 		zlevel = zap.InfoLevel
-		l.Logger.CtxInfof(ctx, format, kvs...)
 	case hlog.LevelNotice, hlog.LevelWarn:
 		zlevel = zap.WarnLevel
-		l.Logger.CtxWarnf(ctx, format, kvs...)
 	case hlog.LevelError:
 		zlevel = zap.ErrorLevel
-		l.Logger.CtxErrorf(ctx, format, kvs...)
 	case hlog.LevelFatal:
 		zlevel = zap.FatalLevel
-		l.Logger.CtxFatalf(ctx, format, kvs...)
 	default:
 		zlevel = zap.WarnLevel
-		l.Logger.CtxWarnf(ctx, format, kvs...)
-	}
-
-	if !span.IsRecording() {
-		l.Logger.Logf(level, format, kvs...)
-		return
 	}
 
 	// set span status
