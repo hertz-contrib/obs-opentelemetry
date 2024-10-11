@@ -36,6 +36,7 @@ func TestServerMiddleware(t *testing.T) {
 	tracer, cfg := NewServerTracer(WithCustomResponseHandler(func(c context.Context, ctx *app.RequestContext) {
 		ctx.Header("trace-id", oteltrace.SpanFromContext(c).SpanContext().TraceID().String())
 	}))
+
 	h := server.Default(tracer, server.WithHostPorts("127.0.0.1:6666"))
 	h.Use(ServerMiddleware(cfg))
 	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {

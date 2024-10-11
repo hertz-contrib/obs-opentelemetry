@@ -15,34 +15,13 @@
 package zerolog
 
 import (
-	hertzzerolog "github.com/hertz-contrib/logger/zerolog"
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelzerolog"
 )
 
-type Logger struct {
-	*hertzzerolog.Logger
-	config *config
-}
-
-// Ref to https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/README.md#json-formats
-const (
-	traceIDKey    = "trace_id"
-	spanIDKey     = "span_id"
-	traceFlagsKey = "trace_flags"
-)
+type Logger = otelzerolog.Logger
 
 func NewLogger(opts ...Option) *Logger {
-	cfg := defaultConfig()
 
-	// apply options
-	for _, opt := range opts {
-		opt.apply(cfg)
-	}
-	logger := *cfg.logger
-	zerologLogger := logger.Unwrap().
-		Hook(cfg.defaultZerologHookFn())
+	return otelzerolog.NewLogger(opts...)
 
-	return &Logger{
-		Logger: hertzzerolog.From(zerologLogger),
-		config: cfg,
-	}
 }

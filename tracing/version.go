@@ -14,10 +14,12 @@
 
 package tracing
 
+import "github.com/cloudwego-contrib/cwgo-pkg/telemetry/semantic"
+
 func Version() string {
-	return "0.39.0"
+	return semantic.Version()
 }
 
 func SemVersion() string {
-	return "semver:" + Version()
+	return semantic.SemVersion()
 }

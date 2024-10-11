@@ -15,130 +15,15 @@
 package tracing
 
 import (
-	"context"
-	"time"
-
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric"
-
-	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/cloudwego/hertz/pkg/common/adaptor"
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelhertz"
 	serverconfig "github.com/cloudwego/hertz/pkg/common/config"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/tracer"
-	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
-	"github.com/hertz-contrib/obs-opentelemetry/tracing/internal"
-	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
-	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
 var _ tracer.Tracer = (*serverTracer)(nil)
 
-type serverTracer struct {
-	config            *Config
-	counters          map[string]metric.Int64Counter
-	histogramRecorder map[string]metric.Float64Histogram
-}
+type serverTracer = otelhertz.HertzTracer
 
 func NewServerTracer(opts ...Option) (serverconfig.Option, *Config) {
-	cfg := newConfig(opts)
-	st := &serverTracer{
-		config:            cfg,
-		counters:          make(map[string]metric.Int64Counter),
-		histogramRecorder: make(map[string]metric.Float64Histogram),
-	}
-
-	st.createMeasures()
-
-	return server.WithTracer(st), cfg
-}
-
-func (s *serverTracer) createMeasures() {
-	serverRequestCountMeasure, err := s.config.meter.Int64Counter(
-		ServerRequestCount,
-		metric.WithUnit("count"),
-		metric.WithDescription("measures Incoming request count total"),
-	)
-	handleErr(err)
-
-	serverLatencyMeasure, err := s.config.meter.Float64Histogram(
-		ServerLatency,
-		metric.WithUnit("ms"),
-		metric.WithDescription("measures th incoming end to end duration"),
-	)
-	handleErr(err)
-
-	s.counters[ServerRequestCount] = serverRequestCountMeasure
-	s.histogramRecorder[ServerLatency] = serverLatencyMeasure
-}
-
-func (s *serverTracer) Start(ctx context.Context, c *app.RequestContext) context.Context {
-	if s.config.shouldIgnore(ctx, c) {
-		return ctx
-	}
-	tc := &internal.TraceCarrier{}
-	tc.SetTracer(s.config.tracer)
-
-	return internal.WithTraceCarrier(ctx, tc)
-}
-
-func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
-	if s.config.shouldIgnore(ctx, c) {
-		return
-	}
-	// trace carrier from context
-	tc := internal.TraceCarrierFromContext(ctx)
-	if tc == nil {
-		hlog.Debugf("get tracer container failed")
-		return
-	}
-
-	ti := c.GetTraceInfo()
-	st := ti.Stats()
-
-	if st.Level() == stats.LevelDisabled {
-		return
-	}
-
-	httpStart := st.GetEvent(stats.HTTPStart)
-	if httpStart == nil {
-		return
-	}
-
-	elapsedTime := float64(st.GetEvent(stats.HTTPFinish).Time().Sub(httpStart.Time())) / float64(time.Millisecond)
-
-	// span
-	span := tc.Span()
-	if span == nil || !span.IsRecording() {
-		return
-	}
-
-	// span attributes from original http request
-	if httpReq, err := adaptor.GetCompatRequest(c.GetRequest()); err == nil {
-		span.SetAttributes(semconv.NetAttributesFromHTTPRequest("tcp", httpReq)...)
-		span.SetAttributes(semconv.EndUserAttributesFromHTTPRequest(httpReq)...)
-		span.SetAttributes(semconv.HTTPServerAttributesFromHTTPRequest("", s.config.serverHttpRouteFormatter(c), httpReq)...)
-		span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(c.Response.StatusCode()))
-	}
-
-	// span attributes
-	attrs := []attribute.KeyValue{
-		semconv.HTTPURLKey.String(c.URI().String()),
-		semconv.NetPeerIPKey.String(c.ClientIP()),
-		semconv.HTTPStatusCodeKey.Int(c.Response.StatusCode()),
-	}
-	span.SetAttributes(attrs...)
-
-	injectStatsEventsToSpan(span, st)
-
-	if panicMsg, panicStack, httpErr := parseHTTPError(ti); httpErr != nil || len(panicMsg) > 0 {
-		recordErrorSpanWithStack(span, httpErr, panicMsg, panicStack)
-	}
-
-	span.End(oteltrace.WithTimestamp(getEndTimeOrNow(ti)))
-
-	metricsAttributes := extractMetricsAttributesFromSpan(span)
-	s.counters[ServerRequestCount].Add(ctx, 1, metric.WithAttributes(metricsAttributes...))
-	s.histogramRecorder[ServerLatency].Record(ctx, elapsedTime, metric.WithAttributes(metricsAttributes...))
+	return otelhertz.NewServerOption(opts...)
 }

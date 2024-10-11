@@ -15,59 +15,23 @@
 package zap
 
 import (
-	hertzzap "github.com/hertz-contrib/logger/zap"
+	"github.com/cloudwego-contrib/cwgo-pkg/log/logging/zap"
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelzap"
 	"go.uber.org/zap/zapcore"
 )
 
-type Option interface {
-	apply(cfg *config)
-}
+type Option = otelzap.Option
 
-type option func(cfg *config)
-
-func (fn option) apply(cfg *config) {
-	fn(cfg)
-}
-
-type traceConfig struct {
-	recordStackTraceInSpan bool
-	errorSpanLevel         zapcore.Level
-}
-
-type config struct {
-	logger      *hertzzap.Logger
-	traceConfig *traceConfig
-}
-
-// defaultConfig default config
-func defaultConfig() *config {
-	return &config{
-		traceConfig: &traceConfig{
-			recordStackTraceInSpan: true,
-			errorSpanLevel:         zapcore.ErrorLevel,
-		},
-		logger: hertzzap.NewLogger(),
-	}
-}
-
-// WithLogger configures logger
-func WithLogger(logger *hertzzap.Logger) Option {
-	return option(func(cfg *config) {
-		logger.PutExtraKeys(extraKeys...)
-		cfg.logger = logger
-	})
+func WithLogger(logger *zap.Logger) Option {
+	return otelzap.WithLogger(logger)
 }
 
 // WithTraceErrorSpanLevel trace error span level option
 func WithTraceErrorSpanLevel(level zapcore.Level) Option {
-	return option(func(cfg *config) {
-		cfg.traceConfig.errorSpanLevel = level
-	})
+	return otelzap.WithTraceErrorSpanLevel(level)
 }
 
 // WithRecordStackTraceInSpan record stack track option
 func WithRecordStackTraceInSpan(recordStackTraceInSpan bool) Option {
-	return option(func(cfg *config) {
-		cfg.traceConfig.recordStackTraceInSpan = recordStackTraceInSpan
-	})
+	return otelzap.WithRecordStackTraceInSpan(recordStackTraceInSpan)
 }

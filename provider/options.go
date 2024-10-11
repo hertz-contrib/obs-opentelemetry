@@ -15,188 +15,98 @@
 package provider
 
 import (
-	"go.opentelemetry.io/contrib/propagators/b3"
-	"go.opentelemetry.io/contrib/propagators/ot"
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/provider/otelprovider"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 )
 
 // Option opts for opentelemetry tracer provider
-type Option interface {
-	apply(cfg *config)
-}
-
-type option func(cfg *config)
-
-func (fn option) apply(cfg *config) {
-	fn(cfg)
-}
-
-type config struct {
-	enableTracing bool
-	enableMetrics bool
-
-	exportInsecure          bool
-	exportEnableCompression bool
-	exportEndpoint          string
-	exportHeaders           map[string]string
-
-	resource          *resource.Resource
-	sdkTracerProvider *sdktrace.TracerProvider
-
-	sampler sdktrace.Sampler
-
-	resourceAttributes []attribute.KeyValue
-	resourceDetectors  []resource.Detector
-
-	textMapPropagator propagation.TextMapPropagator
-
-	meterProvider *metric.MeterProvider
-}
-
-func newConfig(opts []Option) *config {
-	cfg := defaultConfig()
-
-	for _, opt := range opts {
-		opt.apply(cfg)
-	}
-
-	return cfg
-}
-
-func defaultConfig() *config {
-	return &config{
-		enableTracing: true,
-		enableMetrics: true,
-		sampler:       sdktrace.AlwaysSample(),
-		textMapPropagator: propagation.NewCompositeTextMapPropagator(
-			b3.New(),
-			ot.OT{},
-			propagation.Baggage{},
-			propagation.TraceContext{},
-		),
-	}
-}
+type Option = otelprovider.Option
 
 // WithServiceName configures `service.name` resource attribute
 func WithServiceName(serviceName string) Option {
-	return option(func(cfg *config) {
-		cfg.resourceAttributes = append(cfg.resourceAttributes, semconv.ServiceNameKey.String(serviceName))
-	})
+	return otelprovider.WithServiceName(serviceName)
 }
 
 // WithDeploymentEnvironment configures `deployment.environment` resource attribute
 func WithDeploymentEnvironment(env string) Option {
-	return option(func(cfg *config) {
-		cfg.resourceAttributes = append(cfg.resourceAttributes, semconv.DeploymentEnvironmentKey.String(env))
-	})
+	return otelprovider.WithDeploymentEnvironment(env)
 }
 
 // WithServiceNamespace configures `service.namespace` resource attribute
 func WithServiceNamespace(namespace string) Option {
-	return option(func(cfg *config) {
-		cfg.resourceAttributes = append(cfg.resourceAttributes, semconv.ServiceNamespaceKey.String(namespace))
-	})
+	return otelprovider.WithServiceNamespace(namespace)
 }
 
 // WithResourceAttribute configures resource attribute.
 func WithResourceAttribute(rAttr attribute.KeyValue) Option {
-	return option(func(cfg *config) {
-		cfg.resourceAttributes = append(cfg.resourceAttributes, rAttr)
-	})
+	return otelprovider.WithResourceAttribute(rAttr)
 }
 
 // WithResourceAttributes configures resource attributes.
 func WithResourceAttributes(rAttrs []attribute.KeyValue) Option {
-	return option(func(cfg *config) {
-		cfg.resourceAttributes = rAttrs
-	})
+	return otelprovider.WithResourceAttributes(rAttrs)
 }
 
 // WithResource configures resource
 func WithResource(resource *resource.Resource) Option {
-	return option(func(cfg *config) {
-		cfg.resource = resource
-	})
+	return otelprovider.WithResource(resource)
 }
 
 // WithExportEndpoint configures export endpoint
 func WithExportEndpoint(endpoint string) Option {
-	return option(func(cfg *config) {
-		cfg.exportEndpoint = endpoint
-	})
+	return otelprovider.WithExportEndpoint(endpoint)
 }
 
 // WithEnableTracing enable tracing
 func WithEnableTracing(enableTracing bool) Option {
-	return option(func(cfg *config) {
-		cfg.enableTracing = enableTracing
-	})
+	return otelprovider.WithEnableTracing(enableTracing)
 }
 
 // WithEnableMetrics enable metrics
 func WithEnableMetrics(enableMetrics bool) Option {
-	return option(func(cfg *config) {
-		cfg.enableMetrics = enableMetrics
-	})
+	return otelprovider.WithEnableMetrics(enableMetrics)
 }
 
 // WithTextMapPropagator configures propagation
 func WithTextMapPropagator(p propagation.TextMapPropagator) Option {
-	return option(func(cfg *config) {
-		cfg.textMapPropagator = p
-	})
+	return otelprovider.WithTextMapPropagator(p)
 }
 
 // WithResourceDetector configures resource detector
 func WithResourceDetector(detector resource.Detector) Option {
-	return option(func(cfg *config) {
-		cfg.resourceDetectors = append(cfg.resourceDetectors, detector)
-	})
+	return otelprovider.WithResourceDetector(detector)
 }
 
 // WithHeaders configures gRPC requests headers for exported telemetry data
 func WithHeaders(headers map[string]string) Option {
-	return option(func(cfg *config) {
-		cfg.exportHeaders = headers
-	})
+	return otelprovider.WithHeaders(headers)
 }
 
 // WithInsecure disables client transport security for the exporter's gRPC
 func WithInsecure() Option {
-	return option(func(cfg *config) {
-		cfg.exportInsecure = true
-	})
+	return otelprovider.WithInsecure()
 }
 
 // WithEnableCompression enable gzip transport compression
 func WithEnableCompression() Option {
-	return option(func(cfg *config) {
-		cfg.exportEnableCompression = true
-	})
+	return otelprovider.WithEnableCompression()
 }
 
 // WithSampler configures sampler
 func WithSampler(sampler sdktrace.Sampler) Option {
-	return option(func(cfg *config) {
-		cfg.sampler = sampler
-	})
+	return otelprovider.WithSampler(sampler)
 }
 
 // WithSdkTracerProvider configures sdkTracerProvider
 func WithSdkTracerProvider(sdkTracerProvider *sdktrace.TracerProvider) Option {
-	return option(func(cfg *config) {
-		cfg.sdkTracerProvider = sdkTracerProvider
-	})
+	return otelprovider.WithSdkTracerProvider(sdkTracerProvider)
 }
 
 // WithMeterProvider configures MeterProvider
 func WithMeterProvider(meterProvider *metric.MeterProvider) Option {
-	return option(func(cfg *config) {
-		cfg.meterProvider = meterProvider
-	})
+	return otelprovider.WithMeterProvider(meterProvider)
 }

@@ -15,6 +15,7 @@
 package provider
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,7 +27,7 @@ import (
 
 func Test_newResource(t *testing.T) {
 	type args struct {
-		cfg *config
+		cfg *resources
 	}
 	tests := []struct {
 		name              string
@@ -37,7 +38,7 @@ func Test_newResource(t *testing.T) {
 		{
 			name: "with conflict schema version",
 			args: args{
-				cfg: &config{
+				cfg: &resources{
 					resourceAttributes: []attribute.KeyValue{
 						semconv140.ServiceNameKey.String("test-semconv-resource"),
 					},
@@ -53,7 +54,7 @@ func Test_newResource(t *testing.T) {
 		{
 			name: "resource override",
 			args: args{
-				cfg: &config{
+				cfg: &resources{
 					resource: resource.Default(),
 					resourceAttributes: []attribute.KeyValue{
 						semconv.ServiceNameKey.String("test-resource"),
@@ -77,4 +78,30 @@ func Test_newResource(t *testing.T) {
 			}
 		})
 	}
+}
+
+func newResource(cfg *resources) *resource.Resource {
+	if cfg.resource != nil {
+		return cfg.resource
+	}
+
+	res, err := resource.New(
+		context.Background(),
+		resource.WithHost(),
+		resource.WithFromEnv(),
+		resource.WithProcessPID(),
+		resource.WithTelemetrySDK(),
+		resource.WithDetectors(cfg.resourceDetectors...),
+		resource.WithAttributes(cfg.resourceAttributes...),
+	)
+	if err != nil {
+		return resource.Default()
+	}
+	return res
+}
+
+type resources struct {
+	resource           *resource.Resource
+	resourceAttributes []attribute.KeyValue
+	resourceDetectors  []resource.Detector
 }

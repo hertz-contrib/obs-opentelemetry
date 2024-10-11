@@ -17,16 +17,16 @@ package zerolog
 import (
 	"bytes"
 	"context"
-	"testing"
 
+	hzzerolog "github.com/cloudwego-contrib/cwgo-pkg/log/logging/zerolog"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	hertzZerolog "github.com/hertz-contrib/logger/zerolog"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"testing"
 )
 
 func stdoutProvider(ctx context.Context) func() {
@@ -57,9 +57,9 @@ func TestLogger(t *testing.T) {
 	shutdown := stdoutProvider(ctx)
 	defer shutdown()
 
-	hertzZerologer := hertzZerolog.New(
-		hertzZerolog.WithOutput(buf),
-		hertzZerolog.WithLevel(hlog.LevelDebug),
+	hertzZerologer := hzzerolog.New(
+		hzzerolog.WithOutput(buf),
+		hzzerolog.WithLevel(hlog.LevelDebug),
 	)
 
 	logger := NewLogger(

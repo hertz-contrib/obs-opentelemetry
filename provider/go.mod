@@ -14,6 +14,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.19.0
 	go.opentelemetry.io/otel/sdk v1.19.0
 	go.opentelemetry.io/otel/sdk/metric v1.19.0
+	github.com/cloudwego-contrib/cwgo-pkg/telemetry v0.0.0
 )
 
 require (
@@ -38,3 +39,5 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/cloudwego-contrib/cwgo-pkg/telemetry => D:\Projects\Go\cwgo-pkg\telemetry

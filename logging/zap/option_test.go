@@ -17,12 +17,21 @@ package zap
 import (
 	"testing"
 
-	hertzzap "github.com/hertz-contrib/logger/zap"
+	"github.com/cloudwego-contrib/cwgo-pkg/log/logging/zap"
+
 	"github.com/stretchr/testify/assert"
 )
 
+var extraKeys = []zap.ExtraKey{traceIDKey, spanIDKey, traceFlagsKey}
+
+const (
+	traceIDKey    = "trace_id"
+	spanIDKey     = "span_id"
+	traceFlagsKey = "trace_flags"
+)
+
 func TestWithLogger(t *testing.T) {
-	l := NewLogger(WithLogger(hertzzap.NewLogger()))
+	l := NewLogger(WithLogger(zap.NewLogger()))
 	for _, v := range extraKeys {
 		assert.Contains(t, l.GetExtraKeys(), v)
 	}

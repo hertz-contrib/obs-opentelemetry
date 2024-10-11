@@ -53,11 +53,11 @@ func (m *metadataProvider) Keys() []string {
 
 // Inject injects span context into the hertz metadata info
 func Inject(ctx context.Context, c *Config, headers *protocol.RequestHeader) {
-	c.textMapPropagator.Inject(ctx, &metadataProvider{headers: headers})
+	c.GetTextMapPropagator().Inject(ctx, &metadataProvider{headers: headers})
 }
 
 // Extract returns the baggage and span context
 func Extract(ctx context.Context, c *Config, headers *protocol.RequestHeader) (baggage.Baggage, trace.SpanContext) {
-	ctx = c.textMapPropagator.Extract(ctx, &metadataProvider{headers: headers})
+	ctx = c.GetTextMapPropagator().Extract(ctx, &metadataProvider{headers: headers})
 	return baggage.FromContext(ctx), trace.SpanContextFromContext(ctx)
 }

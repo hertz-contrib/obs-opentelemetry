@@ -14,14 +14,7 @@
 
 package tracing
 
-import (
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
-	oteltrace "go.opentelemetry.io/otel/trace"
-)
-
-// Server HTTP metrics
+/*// Server HTTP metrics
 const (
 	ServerRequestCount = "http.server.request_count" // measures the incoming request count total
 	ServerLatency      = "http.server.duration"      // measures th incoming end to end duration
@@ -101,3 +94,4 @@ func matchAttributeKey(key attribute.Key, toMatchKeys []attribute.Key) bool {
 	}
 	return false
 }
+*/

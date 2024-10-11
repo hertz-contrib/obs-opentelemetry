@@ -16,6 +16,7 @@ package tracing
 
 import (
 	"context"
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelhertz"
 	"reflect"
 	"testing"
 
@@ -53,7 +54,7 @@ func TestExtract(t *testing.T) {
 			name: "extract successful",
 			args: args{
 				ctx:      ctx,
-				c:        defaultConfig(),
+				c:        otelhertz.DefaultConfig(),
 				metadata: headers,
 			},
 			want:  bags,
@@ -74,12 +75,12 @@ func TestExtract(t *testing.T) {
 }
 
 func TestInject(t *testing.T) {
-	cfg := newConfig([]Option{WithTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+	cfg := otelhertz.NewConfig([]Option{WithTextMapPropagator(propagation.NewCompositeTextMapPropagator(
 		b3.New(),
 		ot.OT{},
 		propagation.Baggage{},
 		propagation.TraceContext{},
-	))})
+	))}...)
 
 	ctx := context.Background()
 

@@ -15,6 +15,8 @@
 package testutil
 
 import (
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/meter/global"
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/semantic"
 	"os"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -24,6 +26,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 
+	cwmetric "github.com/cloudwego-contrib/cwgo-pkg/telemetry/meter/metric"
 	otelprom "go.opentelemetry.io/otel/exporters/prometheus"
 	stdout "go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	otelmetric "go.opentelemetry.io/otel/metric"
@@ -46,7 +49,34 @@ func OtelTestProvider() (*sdktrace.TracerProvider, otelmetric.MeterProvider, *pr
 	if err != nil {
 		panic(err)
 	}
+	meter := meterProvider.Meter(
+		"github.com/cloudwego-contrib/telemetry-opentelemetry",
+		otelmetric.WithInstrumentationVersion(semantic.SemVersion()),
+	)
+	// Measure for server
+	meter = meterProvider.Meter(
+		"github.com/cloudwego-contrib/telemetry-opentelemetry",
+		otelmetric.WithInstrumentationVersion(semantic.SemVersion()),
+	)
+	serverRequestCountMeasure, err := meter.Int64Counter(
+		semantic.BuildMetricName("http", "server", semantic.RequestCount),
+		otelmetric.WithUnit("count"),
+		otelmetric.WithDescription("measures Incoming request count total"),
+	)
+	HandleErr(err)
 
+	serverLatencyMeasure, err := meter.Float64Histogram(
+		semantic.BuildMetricName("http", "server", semantic.ServerLatency),
+		otelmetric.WithUnit("ms"),
+		otelmetric.WithDescription("measures th incoming end to end duration"),
+	)
+	HandleErr(err)
+
+	measureServer := cwmetric.NewMeasure(
+		cwmetric.WithCounter(semantic.HTTPCounter, cwmetric.NewOtelCounter(serverRequestCountMeasure)),
+		cwmetric.WithRecorder(semantic.HTTPLatency, cwmetric.NewOtelRecorder(serverLatencyMeasure)),
+	)
+	global.SetTracerMeasure(measureServer)
 	return tracerProvider, meterProvider, registry
 }
 
@@ -105,4 +135,10 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 	return tp, err
+}
+
+func HandleErr(err error) {
+	if err != nil {
+		otel.Handle(err)
+	}
 }

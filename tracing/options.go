@@ -16,13 +16,10 @@ package tracing
 
 import (
 	"context"
-
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelhertz"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -30,149 +27,48 @@ const (
 )
 
 // Option opts for opentelemetry tracer provider
-type Option interface {
-	apply(cfg *Config)
-}
-
-type option func(cfg *Config)
-
-func (fn option) apply(cfg *Config) {
-	fn(cfg)
-}
+type Option = otelhertz.Option
 
 type ConditionFunc func(ctx context.Context, c *app.RequestContext) bool
 
-type Config struct {
-	tracer trace.Tracer
-	meter  metric.Meter
-
-	clientHttpRouteFormatter func(req *protocol.Request) string
-	serverHttpRouteFormatter func(c *app.RequestContext) string
-
-	clientSpanNameFormatter func(req *protocol.Request) string
-	serverSpanNameFormatter func(c *app.RequestContext) string
-
-	tracerProvider    trace.TracerProvider
-	meterProvider     metric.MeterProvider
-	textMapPropagator propagation.TextMapPropagator
-
-	recordSourceOperation bool
-
-	customResponseHandler app.HandlerFunc
-	shouldIgnore          ConditionFunc
-}
-
-func newConfig(opts []Option) *Config {
-	cfg := defaultConfig()
-
-	for _, opt := range opts {
-		opt.apply(cfg)
-	}
-
-	cfg.meter = cfg.meterProvider.Meter(
-		instrumentationName,
-		metric.WithInstrumentationVersion(SemVersion()),
-	)
-
-	cfg.tracer = cfg.tracerProvider.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(SemVersion()),
-	)
-
-	return cfg
-}
-
-func defaultConfig() *Config {
-	return &Config{
-		tracerProvider:        otel.GetTracerProvider(),
-		meterProvider:         otel.GetMeterProvider(),
-		textMapPropagator:     otel.GetTextMapPropagator(),
-		customResponseHandler: func(c context.Context, ctx *app.RequestContext) {},
-		clientHttpRouteFormatter: func(req *protocol.Request) string {
-			return string(req.Path())
-		},
-		clientSpanNameFormatter: func(req *protocol.Request) string {
-			return string(req.Method()) + " " + string(req.Path())
-		},
-		serverHttpRouteFormatter: func(c *app.RequestContext) string {
-			// FullPath returns a matched route full path. For not found routes
-			// returns an empty string.
-			route := c.FullPath()
-			// fall back to path
-			if route == "" {
-				route = string(c.Path())
-			}
-			return route
-		},
-		serverSpanNameFormatter: func(c *app.RequestContext) string {
-			// Ref to https://github.com/open-telemetry/opentelemetry-specification/blob/ffddc289462dfe0c2041e3ca42a7b1df805706de/specification/trace/api.md#span
-			// FullPath returns a matched route full path. For not found routes
-			// returns an empty string.
-			route := c.FullPath()
-			// fall back to handler name
-			if route == "" {
-				route = string(c.Path())
-			}
-			return string(c.Method()) + " " + route
-		},
-		shouldIgnore: func(ctx context.Context, c *app.RequestContext) bool {
-			return false
-		},
-	}
-}
+type Config = otelhertz.Config
 
 // WithRecordSourceOperation configures record source operation dimension
 func WithRecordSourceOperation(recordSourceOperation bool) Option {
-	return option(func(cfg *Config) {
-		cfg.recordSourceOperation = recordSourceOperation
-	})
+	return otelhertz.WithRecordSourceOperation(recordSourceOperation)
 }
 
 // WithTextMapPropagator configures propagation
 func WithTextMapPropagator(p propagation.TextMapPropagator) Option {
-	return option(func(cfg *Config) {
-		cfg.textMapPropagator = p
-	})
+	return otelhertz.WithTextMapPropagator(p)
 }
 
 // WithCustomResponseHandler configures CustomResponseHandler
 func WithCustomResponseHandler(h app.HandlerFunc) Option {
-	return option(func(cfg *Config) {
-		cfg.customResponseHandler = h
-	})
+	return otelhertz.WithCustomResponseHandler(h)
 }
 
 // WithClientHttpRouteFormatter configures clientHttpRouteFormatter
 func WithClientHttpRouteFormatter(clientHttpRouteFormatter func(req *protocol.Request) string) Option {
-	return option(func(cfg *Config) {
-		cfg.clientHttpRouteFormatter = clientHttpRouteFormatter
-	})
+	return otelhertz.WithClientHttpRouteFormatter(clientHttpRouteFormatter)
 }
 
 // WithServerHttpRouteFormatter configures serverHttpRouteFormatter
 func WithServerHttpRouteFormatter(serverHttpRouteFormatter func(c *app.RequestContext) string) Option {
-	return option(func(cfg *Config) {
-		cfg.serverHttpRouteFormatter = serverHttpRouteFormatter
-	})
+	return otelhertz.WithServerHttpRouteFormatter(serverHttpRouteFormatter)
 }
 
 // WithClientSpanNameFormatter configures clientSpanNameFormatter
 func WithClientSpanNameFormatter(clientSpanNameFormatter func(req *protocol.Request) string) Option {
-	return option(func(cfg *Config) {
-		cfg.clientSpanNameFormatter = clientSpanNameFormatter
-	})
+	return otelhertz.WithClientSpanNameFormatter(clientSpanNameFormatter)
 }
 
 // WithServerSpanNameFormatter configures serverSpanNameFormatter
 func WithServerSpanNameFormatter(serverSpanNameFormatter func(c *app.RequestContext) string) Option {
-	return option(func(cfg *Config) {
-		cfg.serverSpanNameFormatter = serverSpanNameFormatter
-	})
+	return otelhertz.WithServerSpanNameFormatter(serverSpanNameFormatter)
 }
 
 // WithShouldIgnore allows you to define the condition for enabling distributed tracing
 func WithShouldIgnore(condition ConditionFunc) Option {
-	return option(func(cfg *Config) {
-		cfg.shouldIgnore = condition
-	})
+	return otelhertz.WithShouldIgnore(otelhertz.ConditionFunc(condition))
 }

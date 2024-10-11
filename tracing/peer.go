@@ -14,16 +14,7 @@
 
 package tracing
 
-import (
-	"context"
-	"strings"
-
-	"github.com/cloudwego/hertz/pkg/protocol"
-	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
-)
-
-func injectPeerServiceToMetadata(_ context.Context, attrs []attribute.KeyValue) map[string]string {
+/*func injectPeerServiceToMetadata(_ context.Context, attrs []attribute.KeyValue) map[string]string {
 	serviceName, serviceNamespace, deploymentEnv := getServiceFromResourceAttributes(attrs)
 
 	md := make(map[string]string, 3)
@@ -63,8 +54,9 @@ func extractPeerServiceAttributesFromMetadata(headers *protocol.RequestHeader) [
 	}
 
 	return attrs
-}
-
+}*/
+/*
 func semconvAttributeKeyToHTTPHeader(key string) string {
 	return strings.ReplaceAll(key, ".", "-")
 }
+*/

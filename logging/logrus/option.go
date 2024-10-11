@@ -15,82 +15,42 @@
 package logrus
 
 import (
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otellogrus"
 	"github.com/sirupsen/logrus"
 )
 
 // Option logrus hook option
-type Option interface {
-	apply(cfg *config)
-}
-
-type option func(cfg *config)
-
-func (fn option) apply(cfg *config) {
-	fn(cfg)
-}
-
-type config struct {
-	logger *logrus.Logger
-	hooks  []logrus.Hook
-
-	traceHookConfig *TraceHookConfig
-}
-
-func defaultConfig() *config {
-	// std logger
-	stdLogger := logrus.StandardLogger()
-	// default json format
-	stdLogger.SetFormatter(new(logrus.JSONFormatter))
-
-	return &config{
-		logger: logrus.StandardLogger(),
-		hooks:  []logrus.Hook{},
-		traceHookConfig: &TraceHookConfig{
-			recordStackTraceInSpan: true,
-			enableLevels:           logrus.AllLevels,
-			errorSpanLevel:         logrus.ErrorLevel,
-		},
-	}
-}
+type Option = otellogrus.Option
 
 // WithLogger configures logger
 func WithLogger(logger *logrus.Logger) Option {
-	return option(func(cfg *config) {
-		cfg.logger = logger
-	})
+	return otellogrus.WithLogger(logger)
 }
 
 // WithHook configures hook
 func WithHook(hook logrus.Hook) Option {
-	return option(func(cfg *config) {
-		cfg.hooks = append(cfg.hooks, hook)
-	})
+	return otellogrus.WithHook(hook)
 }
 
 // WithTraceHookConfig configures trace hook config
 func WithTraceHookConfig(hookConfig *TraceHookConfig) Option {
-	return option(func(cfg *config) {
-		cfg.traceHookConfig = hookConfig
-	})
+	return otellogrus.WithTraceHookConfig(otellogrus.NewTraceHookConfig(
+		hookConfig.recordStackTraceInSpan,
+		hookConfig.enableLevels,
+		hookConfig.errorSpanLevel))
 }
 
 // WithTraceHookLevels configures hook levels
 func WithTraceHookLevels(levels []logrus.Level) Option {
-	return option(func(cfg *config) {
-		cfg.traceHookConfig.enableLevels = levels
-	})
+	return otellogrus.WithTraceHookLevels(levels)
 }
 
 // WithTraceHookErrorSpanLevel configures trace hook error span level
 func WithTraceHookErrorSpanLevel(level logrus.Level) Option {
-	return option(func(cfg *config) {
-		cfg.traceHookConfig.errorSpanLevel = level
-	})
+	return otellogrus.WithTraceHookErrorSpanLevel(level)
 }
 
 // WithRecordStackTraceInSpan configures whether record stack trace in span
 func WithRecordStackTraceInSpan(recordStackTraceInSpan bool) Option {
-	return option(func(cfg *config) {
-		cfg.traceHookConfig.recordStackTraceInSpan = recordStackTraceInSpan
-	})
+	return otellogrus.WithRecordStackTraceInSpan(recordStackTraceInSpan)
 }
