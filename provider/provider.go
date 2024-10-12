@@ -15,20 +15,12 @@
 package provider
 
 import (
-	"context"
 	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/provider"
 	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/provider/otelprovider"
 )
 
-type otelProvider struct {
-	provider provider.Provider
-}
-
-func (p *otelProvider) Shutdown(ctx context.Context) error {
-	return p.provider.Shutdown(ctx)
-}
-
 // NewOpenTelemetryProvider Initializes an otlp trace and metrics provider
 func NewOpenTelemetryProvider(opts ...Option) provider.Provider {
+	opts = append(opts, otelprovider.WithHttpServer())
 	return otelprovider.NewOpenTelemetryProvider(opts...)
 }
