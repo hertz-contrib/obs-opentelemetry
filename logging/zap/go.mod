@@ -3,8 +3,7 @@ module github.com/hertz-contrib/obs-opentelemetry/logging/zap
 go 1.21
 
 require (
-	github.com/cloudwego-contrib/cwgo-pkg/log/logging/zap v0.0.0
-	github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelzap v0.0.0
+
 	github.com/cloudwego/hertz v0.9.2
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/otel v1.28.0
@@ -25,9 +24,4 @@ require (
 	golang.org/x/sys v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelzap => D:\Projects\Go\cwgo-pkg\telemetry\instrumentation\otelzap
-
-replace github.com/cloudwego-contrib/cwgo-pkg/log/logging/zap => D:\Projects\Go\cwgo-pkg\log\logging\zap
-
 

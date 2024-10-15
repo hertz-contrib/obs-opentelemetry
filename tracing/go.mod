@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	github.com/bytedance/gopkg v0.0.0-20230728082804-614d0af6619b
-	github.com/cloudwego-contrib/cwgo-pkg/telemetry v0.0.0-00010101000000-000000000000
 	github.com/cloudwego/hertz v0.9.2
 	github.com/prometheus/client_golang v1.19.1
 	github.com/stretchr/testify v1.9.0
@@ -55,4 +54,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/cloudwego-contrib/cwgo-pkg/telemetry => D:\Projects\Go\cwgo-pkg\telemetry
+

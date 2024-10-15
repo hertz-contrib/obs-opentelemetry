@@ -2,9 +2,9 @@ module github.com/hertz-contrib/obs-opentelemetry/logging/zerolog
 
 go 1.21
 
-
 require (
-	github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelzerolog v0.0.0
+	github.com/cloudwego-contrib/cwgo-pkg/log/logging/zerolog v0.0.0-20241014044734-80a98dbe0b6a
+	github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelzerolog v0.0.0-20241014044734-80a98dbe0b6a
 	github.com/cloudwego/hertz v0.9.2
 	github.com/rs/zerolog v1.31.0
 	github.com/stretchr/testify v1.9.0
@@ -14,7 +14,6 @@ require (
 )
 
 require (
-	github.com/cloudwego-contrib/cwgo-pkg/log/logging/zerolog v0.0.0-00010101000000-000000000000 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -28,7 +27,3 @@ require (
 	golang.org/x/sys v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelzerolog => D:\Projects\Go\cwgo-pkg\telemetry\instrumentation\otelzerolog
-
-replace github.com/cloudwego-contrib/cwgo-pkg/log/logging/zerolog => D:\Projects\Go\cwgo-pkg\log\logging\zerolog
