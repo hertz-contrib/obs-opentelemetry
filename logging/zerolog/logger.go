@@ -21,7 +21,5 @@ import (
 type Logger = otelzerolog.Logger
 
 func NewLogger(opts ...Option) *Logger {
-
 	return otelzerolog.NewLogger(opts...)
-
 }

@@ -17,6 +17,7 @@ package zerolog
 import (
 	"bytes"
 	"context"
+	"testing"
 
 	hzzerolog "github.com/cloudwego-contrib/cwgo-pkg/log/logging/zerolog"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -26,7 +27,6 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"testing"
 )
 
 func stdoutProvider(ctx context.Context) func() {
