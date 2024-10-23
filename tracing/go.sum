@@ -21,6 +21,8 @@ github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d/go.mod h1:8EPpV
 github.com/chenzhuoyu/iasm v0.9.0/go.mod h1:Xjy2NpN3h7aUqeqM+woSuuvxmIe6+DDsiNLIrkAmYog=
 github.com/chenzhuoyu/iasm v0.9.1 h1:tUHQJXo3NhBqw6s33wkGn9SP3bvrWLdlVIJ3hQBL7P0=
 github.com/chenzhuoyu/iasm v0.9.1/go.mod h1:Xjy2NpN3h7aUqeqM+woSuuvxmIe6+DDsiNLIrkAmYog=
+github.com/cloudwego-contrib/cwgo-pkg/telemetry v0.0.0-20241014044734-80a98dbe0b6a h1:jB0AG6R9hB/UB7m13a8PJyINrO/Q/CvujvGbUNks48I=
+github.com/cloudwego-contrib/cwgo-pkg/telemetry v0.0.0-20241014044734-80a98dbe0b6a/go.mod h1:xnZ0Px0hRRTDNO5KaicZtGIkza32DBpFglJty79yLzI=
 github.com/cloudwego/hertz v0.9.2 h1:VbqddZ5RuvcgxzfxvXcmTiRisGYoo0+WnHGeDJKhjqI=
 github.com/cloudwego/hertz v0.9.2/go.mod h1:cs8dH6unM4oaJ5k9m6pqbgLBPqakGWMG0+cthsxitsg=
 github.com/cloudwego/netpoll v0.6.0 h1:JRMkrA1o8k/4quxzg6Q1XM+zIhwZsyoWlq6ef+ht31U=

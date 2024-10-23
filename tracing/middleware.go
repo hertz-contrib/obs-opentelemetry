@@ -18,18 +18,9 @@ import (
 	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelhertz"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/client"
-	"github.com/cloudwego/hertz/pkg/protocol"
 )
 
-type StringHeader protocol.RequestHeader
-
-// Visit implements the metainfo.HTTPHeaderCarrier interface.
-func (sh *StringHeader) Visit(f func(k, v string)) {
-	(*protocol.RequestHeader)(sh).VisitAll(
-		func(key, value []byte) {
-			f(string(key), string(value))
-		})
-}
+type StringHeader = otelhertz.StringHeader
 
 func ClientMiddleware(opts ...Option) client.Middleware {
 	return otelhertz.ClientMiddleware(opts...)
