@@ -24,7 +24,6 @@ type StringHeader = otelhertz.StringHeader
 
 func ClientMiddleware(opts ...Option) client.Middleware {
 	return otelhertz.ClientMiddleware(opts...)
-
 }
 
 func ServerMiddleware(cfg *Config) app.HandlerFunc {

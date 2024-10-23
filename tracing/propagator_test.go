@@ -16,9 +16,10 @@ package tracing
 
 import (
 	"context"
-	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelhertz"
 	"reflect"
 	"testing"
+
+	"github.com/cloudwego-contrib/cwgo-pkg/telemetry/instrumentation/otelhertz"
 
 	"github.com/bytedance/gopkg/cloud/metainfo"
 	"github.com/cloudwego/hertz/pkg/protocol"

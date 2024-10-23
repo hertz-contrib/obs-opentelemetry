@@ -51,6 +51,5 @@ func (h *TraceHook) Levels() []logrus.Level {
 
 // Fire logrus hook fire
 func (h *TraceHook) Fire(entry *logrus.Entry) error {
-
 	return h.hook.Fire(entry)
 }
