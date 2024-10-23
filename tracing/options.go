@@ -23,10 +23,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 )
 
-const (
-	instrumentationName = "github.com/hertz-contrib/obs-opentelemetry"
-)
-
 // Option opts for opentelemetry tracer provider
 type Option = otelhertz.Option
 
