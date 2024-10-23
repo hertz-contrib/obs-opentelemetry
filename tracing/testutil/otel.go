@@ -54,11 +54,6 @@ func OtelTestProvider() (*sdktrace.TracerProvider, otelmetric.MeterProvider, *pr
 		"github.com/cloudwego-contrib/telemetry-opentelemetry",
 		otelmetric.WithInstrumentationVersion(semantic.SemVersion()),
 	)
-	// Measure for server
-	meter = meterProvider.Meter(
-		"github.com/cloudwego-contrib/telemetry-opentelemetry",
-		otelmetric.WithInstrumentationVersion(semantic.SemVersion()),
-	)
 	serverRequestCountMeasure, err := meter.Int64Counter(
 		semantic.BuildMetricName("http", "server", semantic.RequestCount),
 		otelmetric.WithUnit("count"),
