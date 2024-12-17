@@ -3,7 +3,7 @@ module github.com/hertz-contrib/obs-opentelemetry/logging/zap
 go 1.19
 
 require (
-	github.com/cloudwego/hertz v0.9.0
+	github.com/cloudwego/hertz v0.9.2
 	github.com/hertz-contrib/logger/zap v1.1.0
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/otel v1.19.0
