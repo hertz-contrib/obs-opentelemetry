@@ -20,13 +20,31 @@ import (
 	"testing"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	hertzzap "github.com/hertz-contrib/logger/zap"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.uber.org/zap"
 )
+
+func noopProvider(ctx context.Context) func() {
+	provider := sdktrace.NewTracerProvider()
+	otel.SetTracerProvider(provider)
+
+	exp := tracetest.NewNoopExporter()
+
+	bsp := sdktrace.NewSimpleSpanProcessor(exp)
+	provider.RegisterSpanProcessor(bsp)
+
+	return func() {
+		if err := provider.Shutdown(ctx); err != nil {
+			panic(err)
+		}
+	}
+}
 
 func stdoutProvider(ctx context.Context) func() {
 	provider := sdktrace.NewTracerProvider()
@@ -126,4 +144,32 @@ func TestLogLevel(t *testing.T) {
 
 	logger.Debugf("this is a debug log %s", "msg")
 	assert.Contains(t, buf.String(), "this is a debug log")
+}
+
+func TestWithExtraKeys(t *testing.T) {
+	ctx := context.Background()
+
+	buf := new(bytes.Buffer)
+
+	shutdown := noopProvider(ctx)
+	defer shutdown()
+
+	logger := NewLogger(
+		WithTraceErrorSpanLevel(zap.WarnLevel),
+		WithLogger(hertzzap.NewLogger(hertzzap.WithExtraKeys([]hertzzap.ExtraKey{"logger"}))),
+	)
+	defer logger.Sync()
+
+	hlog.SetLogger(logger)
+	hlog.SetOutput(buf)
+
+	tracer := otel.Tracer("test otel std logger")
+
+	ctx, span := tracer.Start(ctx, "root")
+	ctx = context.WithValue(ctx, hertzzap.ExtraKey("logger"), "zap")
+
+	hlog.CtxInfof(ctx, "info %s", "this is a info log")
+	assert.Contains(t, buf.String(), "\"logger\":\"zap\"")
+
+	span.End()
 }

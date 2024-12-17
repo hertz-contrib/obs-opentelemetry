@@ -67,7 +67,7 @@ func (l *Logger) CtxLogf(level hlog.Level, ctx context.Context, format string, k
 
 		l.Logger.CtxLogf(level, ctx, format, kvs...)
 	} else {
-		l.Logger.Logf(level, format, kvs...)
+		l.Logger.CtxLogf(level, ctx, format, kvs...)
 	}
 
 	if !span.IsRecording() {
