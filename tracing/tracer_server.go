@@ -74,9 +74,9 @@ func (s *serverTracer) createMeasures() {
 }
 
 func (s *serverTracer) Start(ctx context.Context, c *app.RequestContext) context.Context {
-	if s.config.shouldIgnore(ctx, c) {
-		return ctx
-	}
+	// NOTE: Do not call shouldIgnore here. At this point the request may not be
+	// fully parsed yet, accessing RequestContext fields can cause data races.
+	// The shouldIgnore check is performed in ServerMiddleware instead.
 	tc := &internal.TraceCarrier{}
 	tc.SetTracer(s.config.tracer)
 
@@ -136,9 +136,12 @@ func (s *serverTracer) Finish(ctx context.Context, c *app.RequestContext) {
 		recordErrorSpanWithStack(span, httpErr, panicMsg, panicStack)
 	}
 
+	// Extract metrics attributes before span.End() to avoid data race
+	// with the exporter which may process the span in another goroutine.
+	metricsAttributes := extractMetricsAttributesFromSpan(span)
+
 	span.End(oteltrace.WithTimestamp(getEndTimeOrNow(ti)))
 
-	metricsAttributes := extractMetricsAttributesFromSpan(span)
 	s.counters[ServerRequestCount].Add(ctx, 1, metric.WithAttributes(metricsAttributes...))
 	s.histogramRecorder[ServerLatency].Record(ctx, elapsedTime, metric.WithAttributes(metricsAttributes...))
 }
