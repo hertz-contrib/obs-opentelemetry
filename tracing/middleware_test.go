@@ -29,6 +29,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	oteltrace "go.opentelemetry.io/otel/trace"
@@ -131,12 +132,19 @@ func TestServerTracerNoDataRace(t *testing.T) {
 	// Use BatchSpanProcessor with very aggressive settings to maximize
 	// the chance of race detection
 	bsp := sdktrace.NewBatchSpanProcessor(exporter,
-		sdktrace.WithBatchTimeout(1*time.Millisecond),   // Very short timeout
-		sdktrace.WithMaxExportBatchSize(1),              // Export immediately when 1 span is ready
-		sdktrace.WithMaxQueueSize(1),                    // Small queue to force frequent exports
+		sdktrace.WithBatchTimeout(1*time.Millisecond), // Very short timeout
+		sdktrace.WithMaxExportBatchSize(1),            // Export immediately when 1 span is ready
+		sdktrace.WithMaxQueueSize(1),                  // Small queue to force frequent exports
 	)
 	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(bsp))
 	otel.SetTracerProvider(tp)
+
+	// Use a noop MeterProvider to avoid polluting metrics in other tests
+	mp := sdkmetric.NewMeterProvider()
+	otel.SetMeterProvider(mp)
+	defer func() {
+		_ = mp.Shutdown(context.Background())
+	}()
 
 	tracer, cfg := NewServerTracer(
 		WithShouldIgnore(func(ctx context.Context, c *app.RequestContext) bool {
